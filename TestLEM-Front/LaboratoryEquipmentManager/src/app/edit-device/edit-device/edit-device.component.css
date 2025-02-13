@@ -1,0 +1,46 @@
+.return-button {
+  padding: 6px 4px;
+ }
+
+ thead {
+   tr > th{
+     height: 41px;
+   }
+ }
+
+ .btn-add-mv {
+   min-width: 120px;
+   max-width: 150px;
+ }
+
+ .sml{
+   width: 25px;
+   height: 25px;
+   padding: 0;
+ }
+
+ .tbl {
+   padding: 0 8;
+   flex-wrap: nowrap;
+   margin: 0;
+ }
+
+ .hehe {
+   align-content: space-between;
+ }
+
+ .med{
+   padding: 6px;
+ }
+
+ .measured-value{
+   border-bottom: 1px solid gray;
+ }
+
+ input.ng-invalid.ng-touched {
+   border: 2px solid red;
+ }
+
+ .error {
+   color: red;
+ }

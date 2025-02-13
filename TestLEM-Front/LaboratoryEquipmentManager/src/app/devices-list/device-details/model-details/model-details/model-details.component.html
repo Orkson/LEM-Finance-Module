@@ -1,0 +1,99 @@
+<div class="container">
+  <mat-dialog-content class="mat-typography">
+    <div class="container-fluid d-flex justify-content-between p-0 mb-2">
+      <h3>Szczegóły modelu</h3>
+      <button
+        type="button"
+        class="btn-close mt-2 pe-0"
+        aria-label="Close"
+        (click)="onClose()"
+      ></button>
+    </div>
+    <table class="table border-secondary-subtle">
+      <tbody>
+        <tr>
+          <th>Model</th>
+        </tr>
+        <tr>
+          <th>Nazwa modelu:</th>
+          <td>{{ modelDetials.name ?? "--" }}</td>
+        </tr>
+        <tr>
+          <th>Numer seryjny modelu:</th>
+          <td>{{ modelDetials.serialNumber ?? "--" }}</td>
+        </tr>
+        <tr>
+          <th>Producent:</th>
+          <td>{{ modelDetials.companyName ?? "--" }}</td>
+        </tr>
+        <tr>
+          <th>Dokumenty modelu:</th>
+          <td>
+            <div *ngFor="let modelDocument of modelDocuments">
+              <a
+                href=""
+                (click)="downloadFile(modelDocument, $event, 'model')"
+                >{{ modelDocument.name }}</a
+              >
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <th>Modele powiązane:</th>
+          <td>
+            <div *ngFor="let relatedModel of relatedModels">
+              <td>{{ getRelatedDeviceName(relatedModel) }}</td>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <th>Ilość urządzeń danego modelu w bazie:</th>
+          <td>{{ modelDetials.totalModelCount }}</td>
+        </tr>
+      </tbody>
+    </table>
+    <table
+      class="table table-bordered border-secondary-subtle"
+      *ngIf="shouldDisplayMeasuredValuesTable"
+    >
+      <thead>
+        <tr>
+          <th scope="col" class="align-middle">Wartość mierzona</th>
+          <th scope="col" class="align-middle">Jednostka</th>
+          <th scope="col" class="align-middle">Zakres</th>
+          <th scope="col" class="align-middle">Dokładność zakresu [%]</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let measuredValue of modelDetials.measuredValues">
+          <td>
+            {{ measuredValue.physicalMagnitudeName }}
+          </td>
+          <td>
+            {{ measuredValue.physicalMagnitudeUnit ?? "--" }}
+          </td>
+          <td>
+            <ul class="list-group list-group-flush">
+              <li
+                *ngFor="let range of measuredValue.measuredRanges"
+                class="list-group-item"
+              >
+                {{ range?.range ?? "--" }}
+              </li>
+            </ul>
+          </td>
+          <td>
+            <ul class="list-group list-group-flush">
+              <li
+                *ngFor="let range of measuredValue.measuredRanges"
+                class="list-group-item"
+              >
+                {{ range?.accuracyInPercent ?? "--" }}
+              </li>
+            </ul>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </mat-dialog-content>
+</div>

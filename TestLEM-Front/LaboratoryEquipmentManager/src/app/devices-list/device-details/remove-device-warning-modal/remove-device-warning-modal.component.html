@@ -1,0 +1,13 @@
+<h2 mat-dialog-title>Uwaga!</h2>
+<mat-dialog-content
+  >Czy na pewno chcesz usunąć urządzenie? Wprowadzone zmiany nie będą możliwe do
+  odwrócenia.</mat-dialog-content
+>
+<mat-dialog-actions>
+  <button type="button" class="btn btn-primary me-2" (click)="onDeleteDevice()">
+    Potwierdź
+  </button>
+  <button type="button" class="btn btn-secondary" (click)="onCancel()">
+    Anuluj
+  </button>
+</mat-dialog-actions>

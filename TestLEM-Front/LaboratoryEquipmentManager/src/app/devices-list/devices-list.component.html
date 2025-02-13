@@ -1,0 +1,132 @@
+<div class="container">
+  <h2>Lista urządzeń</h2>
+  <div class="container-fluid d-flex justify-content-between p-0 mb-2">
+    <form class="d-flex" role="search">
+      <input
+        title="Wartość mierzona, nazwa modelu lub nr. identyfikacyjny urządzenia"
+        id="measuredValueSearch"
+        class="form-control me-2"
+        type="search"
+        placeholder="Wartość mierzona, nazwa modelu lub nr. identyfikacyjny urządzenia"
+        [formControl]="serchPhraseFC"
+        (change)="onSearchChanged($event)"
+      />
+      <button
+        class="btn btn-outline-success me-2"
+        type="submit"
+        (click)="find()"
+      >
+        Znajdź
+      </button>
+    </form>
+    <div>
+      <div class="close-to-expire d-flex">
+        <label for="closeToExpireSelect" class="form-label w-100 d-flex"
+          >Wybierz kiedy bliski termin kalibracji [miesiące]</label
+        >
+        <select
+          class="form-select me-4"
+          id="closeToExpireSelect"
+          [(ngModel)]="selectedMonthsToExpire"
+          (change)="refreshCloseToExpireValue($event)"
+        >
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+        </select>
+        <div>
+          <button
+            type="button"
+            class="btn btn-primary"
+            (click)="navigateToAddDevice()"
+          >
+            Dodaj urządzenie
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th scope="col" class="align-middle">
+          Numer identyfikacyjny urządzenia
+        </th>
+        <th
+          scope="col"
+          class="d-flex justify-content-between align-items-center"
+        >
+          <span class="me-2">Model</span>
+          <button
+            id="orderButtonName"
+            class="btn btn-light"
+            (click)="setOrderDirection('modelName')"
+          >
+            &uarr;
+          </button>
+        </th>
+        <th scope="col" class="align-middle">Numer Seryjny</th>
+        <th scope="col" class="align-middle">Wielkości mierzone</th>
+        <th scope="col" class="align-middle">Miejsce przechowywania</th>
+        <th scope="col" class="align-middle">Data Produkcji</th>
+        <th scope="col" class="align-middle">Data ostatniej kalibracji</th>
+        <th
+          scope="col"
+          class="d-flex justify-content-between align-items-center"
+        >
+          <span class="me-2">Data kolejnej kalibracji</span>
+          <button
+            id="orderButtonDate"
+            class="btn btn-light"
+            (click)="setOrderDirection('calibrationDate')"
+          >
+            &uarr;
+          </button>
+        </th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr
+        [class]="'clickable-row ' + markDeviceCloseToExpire(device)"
+        *ngFor="let device of DevicesList.items; let i = index"
+        [attr.id]="'row-id-' + i"
+        (click)="openDeviceDetails(device.deviceId)"
+      >
+        <td>{{ device.deviceIdentificationNumber ?? "--" }}</td>
+        <td>{{ device.modelName ?? "--" }}</td>
+        <td>{{ device.modelSerialNumber ?? "--" }}</td>
+        <td>{{ measuredValuesAsStringTab[i] }}</td>
+        <td>{{ device.storageLocation ?? "--" }}</td>
+        <td>
+          {{
+            device.productionDate
+              ? (device.productionDate | date : "dd.MM.yyyy")
+              : "--"
+          }}
+        </td>
+        <td>
+          {{
+            device.lastCalibrationDate
+              ? (device.lastCalibrationDate | date : "dd.MM.yyyy")
+              : "--"
+          }}
+        </td>
+        <td>
+          {{
+            device.nextCalibrationDate
+              ? (device.nextCalibrationDate | date : "dd.MM.yyyy")
+              : "--"
+          }}
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <mat-paginator
+    [length]="totalDevicesCount"
+    [pageSize]="10"
+    [pageSizeOptions]="[10, 20, 50, 100]"
+    (page)="onPageChanged($event)"
+  >
+  </mat-paginator>
+</div>

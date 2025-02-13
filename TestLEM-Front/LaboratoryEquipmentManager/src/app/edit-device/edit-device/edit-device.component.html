@@ -1,0 +1,407 @@
+<div class="container">
+  <div class="row">
+    <h2>Edytuj urządzenie</h2>
+  </div>
+  <button
+    type="button"
+    class="btn btn-secondary return-button"
+    (click)="navigateToDevicesList()"
+  >
+    Przejdź do listy urządzeń
+  </button>
+  <div class="parameters mb-5">
+    <form [formGroup]="deviceForm" class="mb-3">
+      <h3>Parametry</h3>
+      <h4>Urządzenie</h4>
+      <div class="row">
+        <div class="mb-3 row alig-items-center">
+          <label for="identificationNumber" class="col-sm-3 col-form-label"
+            >Numer identyfikacyjny urządzenia</label
+          >
+          <div class="col-sm-9">
+            <input
+              type="text"
+              class="form-control"
+              id="identificationNumber"
+              formControlName="identificationNumber"
+            />
+            <div *ngIf="shouldShowError('identificationNumber')" class="error">
+              {{ fieldRequired }}
+            </div>
+          </div>
+        </div>
+        <div class="mb-3 row">
+          <label for="productionDate" class="col-sm-3 col-form-label"
+            >Data produkcji</label
+          >
+          <div class="col-sm-9">
+            <input
+              type="date"
+              class="form-control"
+              id="productionDate"
+              formControlName="productionDate"
+            />
+          </div>
+        </div>
+        <div class="mb-3 row">
+          <label for="lastCalibrationDate" class="col-sm-3 col-form-label"
+            >Data ostatniej kalibracji</label
+          >
+          <div class="col-sm-9">
+            <input
+              type="date"
+              class="form-control"
+              id="lastCalibrationDate"
+              formControlName="lastCalibrationDate"
+            />
+          </div>
+        </div>
+        <div class="mb-3 row">
+          <label for="calibrationPeriod" class="col-sm-3 col-form-label"
+            >Okres wzorcowania [lata]</label
+          >
+          <div class="col-sm-9">
+            <input
+              type="number"
+              class="form-control"
+              id="calibrationPeriod"
+              formControlName="calibrationPeriodInYears"
+              min="1"
+            />
+          </div>
+        </div>
+        <div class="mb-3 row">
+          <label for="nextCalibrationDate" class="col-sm-3 col-form-label"
+            >Data najbliższej kalibracji</label
+          >
+          <div class="col-sm-9">
+            <input
+              type="date"
+              class="form-control"
+              id="nextCalibrationDate"
+              formControlName="nextCalibrationDate"
+            />
+          </div>
+        </div>
+        <div class="mb-3 row">
+          <label for="storageLocation" class="col-sm-3 col-form-label"
+            >Miejsce przechowywania</label
+          >
+          <div class="col-sm-9">
+            <input
+              type="text"
+              class="form-control"
+              id="storageLocation"
+              formControlName="storageLocation"
+            />
+          </div>
+        </div>
+      </div>
+      <div class="mb-3">
+        <h4>Dokumenty urządzenia</h4>
+        <div *ngIf="anyDeviceDocuments">
+          <h5>Usuń istniejące dokumenty</h5>
+          <div class="form-text">
+            Zaznacz nazwy dokumentów, które chcesz usunąć dla edytowanego
+            urządzenia
+          </div>
+          <section class="example-section">
+            <p *ngFor="let document of editedDeviceDocuments">
+              <mat-checkbox
+                [checked]="checkedMap[document]"
+                (change)="
+                  onCheckboxChange(
+                    'device-' + document,
+                    document.Id,
+                    'editedDeviceDocuments',
+                    $event
+                  )
+                "
+              >
+                {{ document.name }}
+              </mat-checkbox>
+            </p>
+          </section>
+        </div>
+        <h5>Dodaj nowe dokumenty</h5>
+        <div class="form-text">
+          Wybierz dokumenty które chcesz dodać dla edytowanego urządzenia
+        </div>
+        <input
+          formControlName="documents"
+          class="form-control"
+          type="file"
+          id="devicesDocuments"
+          multiple
+          accept=".pdf, .txt, .jpg, .png, .doc, .docx, .csv"
+          (change)="onDeviceFileChange($event)"
+        />
+        <div id="devicesDocumentsHelpBlock" class="form-text">
+          Dokuemnty dotyczące urządzenia w formacie .pdf, .csv, .jpg (np.
+          faktura, raport kalibracji, karta gwarancyjna)
+        </div>
+      </div>
+      <h4>Model</h4>
+      <div class="alert alert-danger" role="alert">
+        <b>Uwaga!</b> Wprowadzone zmiany dla modelu, wpływają na każdy model
+        danego rodzaju zapisany w bazie! Wybierając model z listy proponowanych,
+        wprowadzasz zmiany w istniejącym w bazie modelu, który może być
+        przypisany do wielu urządzeń.
+      </div>
+      <div formGroupName="model">
+        <div class="mb-3 row">
+          <label for="name" class="col-sm-3 col-form-label">Nazwa modelu</label>
+          <div class="col-sm-9">
+            <input
+              [ngbTypeahead]="searchModelName"
+              (selectItem)="onModelNameSelect($event)"
+              type="text"
+              class="form-control"
+              id="name"
+              formControlName="name"
+              placeholder="Wpisz nazwę lub wybierz z listy proponowanych po rozpoczęciu wpisywania"
+            />
+            <div *ngIf="shouldShowError('model.name')" class="error">
+              {{ fieldRequired }}
+            </div>
+          </div>
+        </div>
+        <div class="mb-3 row">
+          <label for="serialNumber" class="col-sm-3 col-form-label"
+            >Numer seryjny</label
+          >
+          <div class="col-sm-9">
+            <input
+              [ngbTypeahead]="serchModelSerialNumber"
+              placeholder="Wpisz numer lub wybierz z listy proponowanych po rozpoczęciu wpisywania"
+              (selectItem)="onModelSerialNumberSelect($event)"
+              type="text"
+              class="form-control"
+              id="serialNumber"
+              formControlName="serialNumber"
+            />
+            <div *ngIf="shouldShowError('model.serialNumber')" class="error">
+              {{ fieldRequired }}
+            </div>
+          </div>
+        </div>
+        <div class="mb-3 row">
+          <label for="company" class="col-sm-3 col-form-label">Producent</label>
+          <div class="col-sm-9">
+            <input
+              type="text"
+              class="form-control"
+              id="company"
+              formControlName="companyName"
+            />
+          </div>
+        </div>
+        <h5>Wartości mierzone</h5>
+        <div formArrayName="measuredValues" class="mb-3">
+          <div
+            *ngFor="let measuredValue of measuredValues.controls; let i = index"
+          >
+            <div [formGroupName]="i" class="mb-3 measured-value">
+              <div class="row mb-3">
+                <label
+                  [for]="'physicalMagnitudeName-' + i"
+                  class="col-sm-1 col-form-label"
+                  >Nazwa</label
+                >
+                <div class="col-sm-4">
+                  <input
+                    [attr.id]="'physicalMagnitudeName-' + i"
+                    type="text"
+                    class="form-control"
+                    formControlName="physicalMagnitudeName"
+                    required
+                  />
+                  <div
+                    *ngIf="shouldShowErrorById('physicalMagnitudeName-' + i)"
+                    class="error"
+                  >
+                    {{ fieldRequired }}
+                  </div>
+                </div>
+                <label
+                  [for]="'physicalMagnitudeUnit-' + i"
+                  class="col-sm-2 col-form-label"
+                  >Jednostka</label
+                >
+                <div class="col-sm-3">
+                  <input
+                    [attr.id]="'physicalMagnitudeUnit-' + i"
+                    type="text"
+                    class="form-control"
+                    formControlName="physicalMagnitudeUnit"
+                  />
+                </div>
+
+                <button
+                  (click)="removeMeasuredValue(i)"
+                  class="col-sm-2 btn btn-danger"
+                >
+                  Usuń wartość mierzoną
+                </button>
+              </div>
+
+              <div formArrayName="ranges">
+                <div
+                  *ngFor="
+                    let range of measuredValueRanges(i).controls;
+                    let j = index
+                  "
+                >
+                  <div [formGroupName]="j" class="mb-3">
+                    <div class="row">
+                      <label
+                        [for]="'range-' + i + '-' + j"
+                        class="col-sm-1 col-form-label"
+                        >Zakres</label
+                      >
+                      <div class="col-sm-4">
+                        <input
+                          [attr.id]="'range-' + i + '-' + j"
+                          type="text"
+                          class="form-control col-sm-5"
+                          formControlName="range"
+                        />
+                      </div>
+
+                      <label
+                        [for]="'accuracy-' + i + '-' + j"
+                        class="col-sm-2 col-form-label"
+                        >Dokładność w procentach</label
+                      >
+                      <div class="col-sm-3">
+                        <input
+                          [attr.id]="'accuracy-' + i + '-' + j"
+                          type="text"
+                          class="form-control col-sm-5"
+                          formControlName="accuracyInPercent"
+                          min="0"
+                          appPercentageDirective
+                        />
+                        <div
+                          *ngIf="shouldShowErrorById('accuracy-' + i + '-' + j)"
+                          class="error"
+                        >
+                          Wartość pola musi być z zakresu 0-100
+                        </div>
+                      </div>
+                      <button
+                        (click)="removeRangeForMeasuredValue(i, j)"
+                        class="col-sm-1 btn btn-danger sml"
+                      >
+                        -
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <button
+                type="button"
+                (click)="addRangeForMeasuredValue(i)"
+                class="btn btn-success btn-add-mv med mb-4"
+              >
+                Dodaj zakres
+              </button>
+            </div>
+          </div>
+          <button
+            type="button"
+            (click)="addMeasuredValue()"
+            class="btn btn-success btn-add-mv med"
+          >
+            Dodaj wartość mierzoną
+          </button>
+        </div>
+        <div class="mb-3">
+          <h4>Dokumenty modelu</h4>
+          <div *ngIf="anyDeviceDocuments">
+            <h5>Usuń istniejące dokumenty</h5>
+            <div class="form-text">
+              Zaznacz nazwy dokumentów, które chcesz usunąć dla edytowanego
+              modelu
+            </div>
+            <section class="example-section">
+              <p *ngFor="let document of editedModelDocuments">
+                <mat-checkbox
+                  [checked]="checkedMap[document]"
+                  (change)="
+                    onCheckboxChange(
+                      'model-' + document,
+                      document.Id,
+                      'editedModelDocuments',
+                      $event
+                    )
+                  "
+                >
+                  {{ document.name }}
+                </mat-checkbox>
+              </p>
+            </section>
+          </div>
+          <h5>Dodaj nowe dokumenty</h5>
+          <div class="form-text">
+            Wybierz dokumenty które chcesz dodać dla edytowanego urządzenia
+          </div>
+          <input
+            formControlName="documents"
+            class="form-control"
+            type="file"
+            id="modelDocuments"
+            multiple
+            (change)="onModelFileChange($event)"
+          />
+          <div id="modelDocumentsHelpBlock" class="form-text mb-3">
+            Dokuemnty dotyczące modelu w formacie .pdf, .csv, .jpg (np.
+            instrukcja obsługi)
+          </div>
+        </div>
+      </div>
+    </form>
+    <div class="related-devices">
+      <h4>Modele powiązane</h4>
+      <div *ngIf="anyRelatedDevices">
+        <h5>Usuń powiązania</h5>
+        <div class="form-text">
+          Zaznacz nazwy modeli dla których chcesz usunąć powiązania
+        </div>
+        <section class="example-section">
+          <p *ngFor="let control of relateModelsNamesToEdit">
+            <mat-checkbox
+              [checked]="checkedMap[control.name]"
+              (change)="
+                onCheckboxChange(
+                  'relation-' + control.name,
+                  control.id,
+                  'relatedModels',
+                  $event
+                )
+              "
+            >
+              {{ control.name }}
+            </mat-checkbox>
+          </p>
+        </section>
+      </div>
+      <h5>Dodaj nowe powiązania</h5>
+      <div class="form-text">
+        Wybierz z listy nazwy modeli, dla których chcesz stworzyć nowe
+        powiązanie z edytowanym modelem
+      </div>
+      <p-multiSelect
+        [options]="modelNameIds"
+        [(ngModel)]="selectedRelatedModelsNames"
+        optionLabel="name"
+        placeholder="Wybierz nazwy modeli które chcesz powiązać"
+      />
+    </div>
+  </div>
+  <div class="d-flex justify-content-end">
+    <button type="submit" (click)="onSubmit()" class="btn btn-success mb-3">
+      Zapisz
+    </button>
+  </div>
+</div>

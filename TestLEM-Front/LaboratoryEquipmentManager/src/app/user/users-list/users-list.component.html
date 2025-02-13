@@ -1,0 +1,31 @@
+<div class="container">
+  <table class="table table-sm">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Nazwa użytkownika</th>
+        <th scope="col">Email</th>
+        <th scope="col">Jest adminem</th>
+        <th scope="col">Akcja</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let user of users; let i = index">
+        <th>{{ i + 1 }}</th>
+        <th>{{ user.username }}</th>
+        <th>{{ user.email }}</th>
+        <th>{{ user.isAdmin ? "TAK" : "NIE" }}</th>
+        <th>
+          <button
+            type="button"
+            class="btn btn-danger"
+            (click)="deleteUser(user.username)"
+            [disabled]="isCurrentUser(user.username)"
+          >
+            Usuń
+          </button>
+        </th>
+      </tr>
+    </tbody>
+  </table>
+</div>

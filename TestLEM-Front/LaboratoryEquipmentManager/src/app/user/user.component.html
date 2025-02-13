@@ -1,0 +1,142 @@
+<div class="container mb-3">
+  <h2>Profil użytkownika</h2>
+  <table class="table border-secondary-subtle">
+    <tbody>
+      <tr>
+        <th>username:</th>
+        <td>{{ userInfo?.username }}</td>
+      </tr>
+      <tr>
+        <th>e-mail:</th>
+        <td>{{ userInfo?.email }}</td>
+      </tr>
+    </tbody>
+  </table>
+  <button class="btn btn-warning me-2 mb-2" (click)="openChangePasswordModal()">
+    Zmień hasło
+  </button>
+  <button
+    class="btn btn-success mb-2"
+    (click)="openRegisterModal()"
+    *ngIf="isCurrentUserAdmin"
+  >
+    Dodaj użytkownika
+  </button>
+</div>
+<app-users-list
+  *ngIf="isCurrentUserAdmin"
+  [currentUserUsername]="currentUserUsername"
+></app-users-list>
+
+<div *ngIf="showModal" class="modal">
+  <div class="modal-content">
+    <span class="close" (click)="closeChangePasswordModal()">&times;</span>
+    <h2>Zmień hasło</h2>
+    <form (submit)="changePassword()">
+      <div class="form-group">
+        <label for="oldPassword">Stare hasło:</label>
+        <input
+          type="password"
+          id="oldPassword"
+          [(ngModel)]="oldPassword"
+          name="oldPassword"
+          required
+        />
+      </div>
+      <div class="form-group">
+        <label for="newPassword">Nowe hasło:</label>
+        <input
+          type="password"
+          id="newPassword"
+          [(ngModel)]="newPassword"
+          name="newPassword"
+          required
+        />
+        <div *ngIf="passwordError" class="error">{{ passwordError }}</div>
+      </div>
+      <div class="form-group">
+        <label for="confirmPassword">Potwierdź nowe hasło:</label>
+        <input
+          type="password"
+          id="confirmPassword"
+          [(ngModel)]="confirmPassword"
+          name="confirmPassword"
+          required
+        />
+        <div *ngIf="passwordMismatch" class="error">
+          Hasła nie pasują do siebie!
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary">Zmień hasło</button>
+    </form>
+  </div>
+</div>
+
+<div *ngIf="showRegisterModal" class="modal">
+  <div class="modal-content">
+    <span class="close" (click)="closeRegisterModal()">&times;</span>
+    <h2>Dodaj użytkownika</h2>
+    <form (submit)="register()">
+      <div class="form-group">
+        <label for="email">E-mail:</label>
+        <input
+          type="email"
+          id="email"
+          [(ngModel)]="registerEmail"
+          name="email"
+          required
+        />
+        <div *ngIf="emailError" class="error">{{ emailError }}</div>
+      </div>
+      <div class="form-group">
+        <label for="username">Nazwa użytkownika:</label>
+        <input
+          type="text"
+          id="username"
+          [(ngModel)]="registerUsername"
+          name="username"
+          required
+        />
+        <div *ngIf="usernameError" class="error">{{ usernameError }}</div>
+      </div>
+      <div class="form-group">
+        <label for="registerPassword">Hasło:</label>
+        <input
+          type="password"
+          id="registerPassword"
+          [(ngModel)]="registerPassword"
+          name="registerPassword"
+          required
+        />
+        <div *ngIf="registerPasswordError" class="error">
+          {{ registerPasswordError }}
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="confirmRegisterPassword">Potwierdź hasło:</label>
+        <input
+          type="password"
+          id="confirmRegisterPassword"
+          [(ngModel)]="confirmRegisterPassword"
+          name="confirmRegisterPassword"
+          required
+        />
+        <div *ngIf="registerPasswordMismatch" class="error">
+          Hasła nie pasują do siebie!
+        </div>
+      </div>
+      <div>
+        <label for="isAdmin">
+          <input
+            type="checkbox"
+            id="isAdmin"
+            name="isAdmin"
+            [(ngModel)]="isAdmin"
+          />
+          Nadaj uprawnienia admina
+        </label>
+      </div>
+      <button type="submit" class="btn btn-primary">Dodaj użytkownika</button>
+    </form>
+  </div>
+</div>

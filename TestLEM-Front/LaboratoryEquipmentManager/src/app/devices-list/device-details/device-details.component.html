@@ -1,0 +1,175 @@
+<div class="container">
+  <mat-dialog-content class="mat-typography">
+    <div class="container-fluid d-flex justify-content-between p-0 mb-2">
+      <h3>Szczegóły urządzenia</h3>
+      <button
+        type="button"
+        class="btn-close mt-2 pe-0"
+        aria-label="Close"
+        (click)="onClose()"
+      ></button>
+    </div>
+    <table class="table border-secondary-subtle">
+      <tbody>
+        <tr>
+          <th>Urządzenie</th>
+        </tr>
+        <tr>
+          <th>Id:</th>
+          <td>{{ deviceDto.deviceId ?? "--" }}</td>
+        </tr>
+        <tr>
+          <th>Numer identyfikacyjny urządzenia:</th>
+          <td>{{ deviceDto.deviceIdentificationNumber ?? "--" }}</td>
+        </tr>
+        <tr>
+          <th>Data produkcji:</th>
+          <td>
+            {{
+              deviceDto.productionDate
+                ? (deviceDto.productionDate | date : "dd.MM.yyyy")
+                : "--"
+            }}
+          </td>
+        </tr>
+        <tr>
+          <th>Skalibrowany:</th>
+          <td>{{ deviceDto.isCalibrated ? "TAK" : "NIE" }}</td>
+        </tr>
+        <tr>
+          <th>Ostatnia data kalibracji:</th>
+          <td>
+            {{
+              deviceDto.lastCalibrationDate
+                ? (deviceDto.lastCalibrationDate | date : "dd.MM.yyyy")
+                : "--"
+            }}
+          </td>
+        </tr>
+        <tr>
+          <th>Okres kalibracji (lata):</th>
+          <td>{{ deviceDto.calibrationPeriodInYears ?? "--" }}</td>
+        </tr>
+        <tr>
+          <th>Miejsce przechowywania:</th>
+          <td>{{ deviceDto.storageLocation ?? "--" }}</td>
+        </tr>
+        <tr>
+          <th>Dokumenty urządzenia:</th>
+          <td>
+            <div *ngFor="let deviceDocuemnt of deviceDocuments">
+              <a
+                href=""
+                (click)="downloadFile(deviceDocuemnt, $event, 'device')"
+                >{{ deviceDocuemnt.name }}</a
+              >
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td></td>
+        </tr>
+        <tr>
+          <th>Model</th>
+        </tr>
+        <tr>
+          <th>Nazwa modelu:</th>
+          <td>{{ deviceDto.modelName ?? "--" }}</td>
+        </tr>
+        <tr>
+          <th>Numer seryjny modelu:</th>
+          <td>{{ deviceDto.modelSerialNumber ?? "--" }}</td>
+        </tr>
+        <tr>
+          <th>Ilość urządzeń danego modelu w bazie:</th>
+          <td>{{ deviceDto.totalDevicesOfModelCount }}</td>
+        </tr>
+        <tr>
+          <th>Producent:</th>
+          <td>{{ deviceDto.producer ?? "--" }}</td>
+        </tr>
+        <tr>
+          <th>Dokumenty modelu:</th>
+          <td>
+            <div *ngFor="let modelDocument of modelDocuments">
+              <a
+                href=""
+                (click)="downloadFile(modelDocument, $event, 'model')"
+                >{{ modelDocument.name }}</a
+              >
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <th>Modele powiązane</th>
+          <td>
+            <div *ngFor="let relatedModel of relatedModels">
+              <a
+                href=""
+                (click)="
+                  openModelDetails(relatedModel.id, relatedModel.name, $event)
+                "
+                >{{ getRelatedDeviceName(relatedModel) }}</a
+              >
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <table
+      class="table table-bordered border-secondary-subtle"
+      *ngIf="shouldDisplayMeasuredValuesTable"
+    >
+      <thead>
+        <tr>
+          <th scope="col" class="align-middle">Wartość mierzona</th>
+          <th scope="col" class="align-middle">Jednostka</th>
+          <th scope="col" class="align-middle">Zakres</th>
+          <th scope="col" class="align-middle">Dokładność zakresu [%]</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let measuredValue of deviceDto.measuredValues">
+          <td>
+            {{ measuredValue.physicalMagnitudeName }}
+          </td>
+          <td>
+            {{ measuredValue.physicalMagnitudeUnit ?? "--" }}
+          </td>
+          <td>
+            <ul class="list-group list-group-flush">
+              <li
+                *ngFor="let range of measuredValue.measuredRanges"
+                class="list-group-item"
+              >
+                {{ range?.range ?? "--" }}
+              </li>
+            </ul>
+          </td>
+          <td>
+            <ul class="list-group list-group-flush">
+              <li
+                *ngFor="let range of measuredValue.measuredRanges"
+                class="list-group-item"
+              >
+                {{ range?.accuracyInPercent ?? "--" }}
+              </li>
+            </ul>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="container-fluid d-flex mb-2">
+      <button
+        type="button"
+        class="btn btn-warning me-2"
+        (click)="navigateToEdit()"
+      >
+        Edytuj
+      </button>
+      <button type="button" class="btn btn-danger" (click)="onDeleteDevice()">
+        Usuń
+      </button>
+    </div>
+  </mat-dialog-content>
+</div>
