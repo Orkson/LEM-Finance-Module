@@ -3,6 +3,7 @@ using System;
 using Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,18 +11,20 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(LemDbContext))]
-    partial class LemDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250306191222_AddCalibrationCostsAndExchangeRates")]
+    partial class AddCalibrationCostsAndExchangeRates
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.4");
 
             modelBuilder.Entity("Domain.Entities.CalibrationCost", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("TEXT");
 
                     b.Property<decimal>("Amount")
                         .HasColumnType("TEXT");
@@ -33,7 +36,10 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("DeviceId")
+                    b.Property<Guid>("DeviceId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("DeviceId1")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("Year")
@@ -41,7 +47,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DeviceId");
+                    b.HasIndex("DeviceId1");
 
                     b.ToTable("CalibrationCosts");
                 });
@@ -475,7 +481,7 @@ namespace Infrastructure.Migrations
                 {
                     b.HasOne("Domain.Entities.Device", "Device")
                         .WithMany()
-                        .HasForeignKey("DeviceId")
+                        .HasForeignKey("DeviceId1")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

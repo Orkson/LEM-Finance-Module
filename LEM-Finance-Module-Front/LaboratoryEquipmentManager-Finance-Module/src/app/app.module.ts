@@ -25,6 +25,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { LoginComponent } from './login/login.component';
 import { AuthService } from './auth-service.service';
 import { UsersListComponent } from './user/users-list/users-list.component';
+import { CalibrationCostComponent } from './calibration-cost/calibration-cost.component';
 
 @NgModule({
   declarations: [
@@ -37,7 +38,8 @@ import { UsersListComponent } from './user/users-list/users-list.component';
     PercentageDirective,
     ModelDetailsComponent,
     EditDeviceComponent,
-    LoginComponent
+    LoginComponent,
+    CalibrationCostComponent
   ],
   imports: [
     BrowserModule,
@@ -54,11 +56,11 @@ import { UsersListComponent } from './user/users-list/users-list.component';
     NgbTypeaheadModule,
     MultiSelectModule,
     MatCheckboxModule,
-    UsersListComponent
+    UsersListComponent,
     ],
   providers: [
     { provide: MatPaginatorIntl, useClass: PolishPaginatorIntl }
   ],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent, CalibrationCostComponent]
 })
 export class AppModule { }

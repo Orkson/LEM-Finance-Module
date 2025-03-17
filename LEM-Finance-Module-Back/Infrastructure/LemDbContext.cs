@@ -19,6 +19,8 @@ namespace Infrastructure
         public DbSet<PhysicalMagnitude> PhysicalMagnitudes { get; set; }
         public DbSet<Document> Documents { get; set; }
         public DbSet<ModelCooperation> ModelCooperation { get; set; }
+        public DbSet<CalibrationCost> CalibrationCosts { get; set; }
+        public DbSet<ExchangeRate> ExchangeRates { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
