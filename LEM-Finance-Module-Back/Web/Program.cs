@@ -43,7 +43,7 @@ builder.Services.AddScoped<IDeviceRepository, DeviceRepository>();
 builder.Services.AddScoped<IDocumentRepository, DocumentRepository>();
 builder.Services.AddScoped<IModelCooperationRepository, ModelCooperationRepository>();
 builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
-builder.Services.AddScoped<ICalibrationCostRepository, CalibrationCostRepository>();
+builder.Services.AddScoped<IExpensePlannerRepository, ExpensePlannerRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IApplicationDbContext, LemDbContext>();
 
