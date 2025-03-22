@@ -92,6 +92,33 @@ export class ApiServiceService {
       params,
     });
   }
+
+  getExpensesByYear(year: number): Observable<any[]> {
+    console.log('Api URL getExpensesByYear', this.apiUrl);
+    return this.http.get<any[]>(this.apiUrl + `expenses-planner/` + year);
+  }
+
+  createExpense(expense: any): Observable<any> {
+    return this.http.post<any>(this.apiUrl + `expenses-planner/`, expense);
+  }
+
+  updateExpense(id: number, expense: any): Observable<void> {
+    console.log('updateExpense', this.apiUrl);
+    return this.http.put<void>(`${this.apiUrl}expenses-planner/${id}`, expense);
+  }
+  
+  deleteExpense(id: number): Observable<void> {
+    console.log('deleteExpense', this.apiUrl);
+    return this.http.delete<void>(`${this.apiUrl}expenses-planner/${id}`);
+  }
+
+  getServices(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}services`);
+  }
+
+  getDevice(): Observable<any> {
+    return this.http.get<any>(this.apiUrl + 'devices');
+  }
 }
 
 export class AddDeviceDto {

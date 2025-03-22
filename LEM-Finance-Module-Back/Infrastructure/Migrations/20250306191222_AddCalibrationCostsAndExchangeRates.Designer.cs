@@ -3,6 +3,7 @@ using System;
 using Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,12 +11,46 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(LemDbContext))]
-    partial class LemDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250306191222_AddCalibrationCostsAndExchangeRates")]
+    partial class AddCalibrationCostsAndExchangeRates
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.4");
+
+            modelBuilder.Entity("Domain.Entities.CalibrationCost", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CalibrationDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("DeviceId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("DeviceId1")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Year")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DeviceId1");
+
+                    b.ToTable("CalibrationCosts");
+                });
 
             modelBuilder.Entity("Domain.Entities.Company", b =>
                 {
@@ -136,51 +171,6 @@ namespace Infrastructure.Migrations
                     b.ToTable("ExchangeRates");
                 });
 
-            modelBuilder.Entity("Domain.Entities.ExpensePlanner", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Currency")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int?>("DeviceId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<decimal>("GrossPrice")
-                        .HasColumnType("TEXT");
-
-                    b.Property<decimal>("NetPrice")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("PlannedDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int?>("ServiceId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Status")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("StorageLocationName")
-                        .HasColumnType("TEXT");
-
-                    b.Property<decimal>("Tax")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DeviceId");
-
-                    b.HasIndex("ServiceId");
-
-                    b.ToTable("ExpensePlanner");
-                });
-
             modelBuilder.Entity("Domain.Entities.MeasuredRange", b =>
                 {
                     b.Property<int>("Id")
@@ -290,20 +280,6 @@ namespace Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("PhysicalMagnitudes");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Service", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("ServiceName")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Service");
                 });
 
             modelBuilder.Entity("Domain.Entities.User", b =>
@@ -501,6 +477,17 @@ namespace Infrastructure.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Domain.Entities.CalibrationCost", b =>
+                {
+                    b.HasOne("Domain.Entities.Device", "Device")
+                        .WithMany()
+                        .HasForeignKey("DeviceId1")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Device");
+                });
+
             modelBuilder.Entity("Domain.Entities.Device", b =>
                 {
                     b.HasOne("Domain.Entities.Model", "Model")
@@ -527,21 +514,6 @@ namespace Infrastructure.Migrations
                     b.Navigation("Device");
 
                     b.Navigation("Model");
-                });
-
-            modelBuilder.Entity("Domain.Entities.ExpensePlanner", b =>
-                {
-                    b.HasOne("Domain.Entities.Device", "Device")
-                        .WithMany()
-                        .HasForeignKey("DeviceId");
-
-                    b.HasOne("Domain.Entities.Service", "Service")
-                        .WithMany()
-                        .HasForeignKey("ServiceId");
-
-                    b.Navigation("Device");
-
-                    b.Navigation("Service");
                 });
 
             modelBuilder.Entity("Domain.Entities.MeasuredRange", b =>

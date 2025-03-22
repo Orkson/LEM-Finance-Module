@@ -18,7 +18,7 @@ export class LoginComponent {
     this.authService.login(this.username, this.password).subscribe({
       next: (token) => {
         this.authService.setToken(token);
-        this.router.navigate(['/devices-list']);
+        this.router.navigate(['/expenses-planner']);
       },
       error: (err) => {
         this.errorMessage = 'Nieprawidłowa nazwa użytkownika lub hasło';

@@ -14,6 +14,9 @@ namespace Application.Abstractions
         DbSet<PhysicalMagnitude> PhysicalMagnitudes { get; set; }
         DbSet<Document> Documents { get; set; }
         DbSet<ModelCooperation> ModelCooperation { get; set; }
+        public DbSet<ExchangeRate> ExchangeRates { get; set; }
+        public DbSet<ExpensePlanner> ExpensePlanner { get; set; }
+        public DbSet<Service> Service { get; set; }
 
         DatabaseFacade Database { get; }
 

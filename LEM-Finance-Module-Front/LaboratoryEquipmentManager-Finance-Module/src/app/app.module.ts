@@ -25,6 +25,8 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { LoginComponent } from './login/login.component';
 import { AuthService } from './auth-service.service';
 import { UsersListComponent } from './user/users-list/users-list.component';
+import { ExpensePlannerListComponent } from './expense-planner-list/expense-planner-list.component';
+import { ExpensePlannerFormComponent } from './expense-planner-form/expense-planner-form.component';
 
 @NgModule({
   declarations: [
@@ -37,7 +39,9 @@ import { UsersListComponent } from './user/users-list/users-list.component';
     PercentageDirective,
     ModelDetailsComponent,
     EditDeviceComponent,
-    LoginComponent
+    LoginComponent,
+    ExpensePlannerListComponent,
+    ExpensePlannerFormComponent
   ],
   imports: [
     BrowserModule,
@@ -54,7 +58,7 @@ import { UsersListComponent } from './user/users-list/users-list.component';
     NgbTypeaheadModule,
     MultiSelectModule,
     MatCheckboxModule,
-    UsersListComponent
+    UsersListComponent,
     ],
   providers: [
     { provide: MatPaginatorIntl, useClass: PolishPaginatorIntl }
