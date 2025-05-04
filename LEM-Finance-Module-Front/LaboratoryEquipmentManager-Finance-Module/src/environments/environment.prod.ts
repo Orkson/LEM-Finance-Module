@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://lemapi.azurewebsites.net/api'
+  apiUrl: 'https://lem-finance-module.azurewebsites.net/api'
 };
