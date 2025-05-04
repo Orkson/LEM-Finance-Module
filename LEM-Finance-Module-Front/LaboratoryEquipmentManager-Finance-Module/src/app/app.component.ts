@@ -40,6 +40,14 @@ export class AppComponent implements OnInit {
     this.router.navigate(['/devices-list']);
   }
 
+  navigateToExpensesPlannerList() {
+    this.router.navigate(['/expenses-planner']);
+  }
+
+  navigateToNewExpensesPlanner() {
+    this.router.navigate(['/expenses-planner-form']);
+  }
+
   logOut() {
     this.authService.logout();
     this.router.navigate(['/login']);

@@ -1,0 +1,79 @@
+<div class="form-container">
+  <h2>{{ expenseId ? 'Edytuj planowany wydatek' : 'Stwórz zaplanowany wydatek' }}</h2>
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+
+    <div class="form-group">
+      <label>Planowana data:</label>
+      <input type="date" formControlName="plannedDate" required />
+    </div>
+
+    <div class="form-group">
+      <label>Laboratorium:</label>
+      <input type="text" formControlName="storageLocationName" placeholder="Enter storage location" />
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Cena netto:</label>
+        <input type="number" formControlName="netPrice" required />
+      </div>
+
+      <div class="form-group">
+        <label>Cena brutto:</label>
+        <input type="number" formControlName="grossPrice" required />
+      </div>
+
+      <div class="form-group">
+        <label>Podatek VAT:</label>
+        <input type="number" formControlName="tax" required />
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Waluta:</label>
+      <select formControlName="currency">
+        <option value="PLN">PLN</option>
+        <option value="EUR">EUR</option>
+        <option value="USD">USD</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Opis:</label>
+      <textarea formControlName="description" placeholder="Enter description"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Status:</label>
+      <select formControlName="status">
+        <option value="Zaplanowany">Zaplanowany</option>
+        <option value="Wykonany">Wykonany</option>
+        <option value="Anulowany">Anulowany</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Nazwa usługi:</label>
+      <select formControlName="serviceId" required>
+        <option *ngFor="let service of services" [value]="service.id">
+          {{ service.serviceName }}
+        </option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Urządzenie:</label>
+      <select formControlName="deviceId" required>
+        <option *ngFor="let device of devices" [value]="device.deviceId">
+          {{ device.modelName }} {{ device.deviceIdentificationNumber }})
+        </option>
+      </select>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn save" [disabled]="form.invalid">Zapisz</button>
+      <button type="button" class="btn cancel" (click)="router.navigate(['/expenses-planner-list'])">Cancel</button>
+    </div>
+
+  </form>
+</div>

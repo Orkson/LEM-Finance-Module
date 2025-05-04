@@ -1,0 +1,139 @@
+.expenses-container {
+    max-width: 1000px;
+    margin: 40px auto;
+    padding: 20px;
+    background-color: #ffffff;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    font-family: Arial, sans-serif;
+  }
+  
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .header h2 {
+    color: #333;
+    margin: 0;
+  }
+  
+  .year-selector label {
+    margin-right: 10px;
+    font-weight: bold;
+    color: #555;
+  }
+  
+  .year-selector select {
+    padding: 6px 12px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    background: #fff;
+    cursor: pointer;
+  }
+  
+  .expenses-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .expenses-table th, .expenses-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  
+  .expenses-table th {
+    background-color: #f4f6f8;
+    color: #333;
+  }
+  
+  .expenses-table tbody tr:hover {
+    background-color: #fafbfc;
+  }
+  
+  .status {
+    padding: 4px 10px;
+    border-radius: 4px;
+    color: #fff;
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+  }
+  
+  .status.zaplanowany { background-color: #007bff; }
+  .status.wykonany  { background-color: #28a745; }
+  .status.zaakceptowany { background-color: #17a2b8; }
+  .status.anulowany { background-color: #dc3545; }
+  
+  .btn {
+    padding: 6px 12px;
+    margin-right: 6px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    color: white;
+    transition: opacity 0.3s;
+  }
+  
+  .btn.edit { background-color: #ffc107; }
+  .btn.delete { background-color: #dc3545; }
+  
+  .btn:hover { opacity: 0.8; }
+  
+  .no-data {
+    text-align: center;
+    padding: 15px;
+    color: #888;
+    font-style: italic;
+  }
+  .summary-container {
+    margin-top: 30px;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+  }
+  
+  .summary-container h3 {
+    margin-bottom: 15px;
+    color: #333;
+    text-align: center;
+  }
+  
+  .summary-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .summary-table th,
+  .summary-table td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #dee2e6;
+  }
+  
+  .summary-table th {
+    background-color: #e9ecef;
+    color: #495057;
+  }
+  
+  .summary-table .total-row {
+    background-color: #dde1e4;
+    color: #000000;
+    font-size: 16px;
+  }
+  
+  .summary-table .total-row td {
+    border-bottom: none;
+  }
+
+  .summary-table .spacer-row {
+  height: 15px;
+  background-color: transparent;
+  border: none;
+}
+
+  

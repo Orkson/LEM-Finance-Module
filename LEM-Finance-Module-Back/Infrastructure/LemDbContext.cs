@@ -19,6 +19,9 @@ namespace Infrastructure
         public DbSet<PhysicalMagnitude> PhysicalMagnitudes { get; set; }
         public DbSet<Document> Documents { get; set; }
         public DbSet<ModelCooperation> ModelCooperation { get; set; }
+        public DbSet<ExchangeRate> ExchangeRates { get; set; }
+        public DbSet<ExpensePlanner> ExpensePlanner { get; set; }
+        public DbSet<Service> Service { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -97,6 +100,16 @@ namespace Infrastructure
                 mr.Property(x => x.AccuracyInPercet)
                 .HasConversion<double>()
             );
+
+            modelBuilder.Entity<ExpensePlanner>()
+                .HasOne(e => e.Service)
+                .WithMany()
+                .HasForeignKey(e => e.ServiceId);
+
+            modelBuilder.Entity<ExpensePlanner>()
+                .HasOne(e => e.Device)
+                .WithMany()
+                .HasForeignKey(e => e.DeviceId);
         }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

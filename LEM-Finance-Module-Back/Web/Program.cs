@@ -43,6 +43,7 @@ builder.Services.AddScoped<IDeviceRepository, DeviceRepository>();
 builder.Services.AddScoped<IDocumentRepository, DocumentRepository>();
 builder.Services.AddScoped<IModelCooperationRepository, ModelCooperationRepository>();
 builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
+builder.Services.AddScoped<IExpensePlannerRepository, ExpensePlannerRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IApplicationDbContext, LemDbContext>();
 
@@ -53,9 +54,9 @@ builder.Services.AddCors(options =>
         {
             var allowedOrigins = configuration.GetSection("Cors:AllowedOrigins").Value;
             policy.WithOrigins(allowedOrigins)
-                  .AllowAnyHeader()
-                  .AllowAnyMethod()
-                  .AllowCredentials();
+                 .AllowAnyHeader()
+                 .AllowAnyMethod()
+                 .AllowCredentials();
         });
 });
 
@@ -104,6 +105,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+var allowedOrigins = configuration.GetSection("Cors:AllowedOrigins").Value;
+Console.WriteLine($"Allowed Origins: {allowedOrigins}");
 
 app.UseHttpsRedirection();
 app.UseRouting();
@@ -122,8 +125,8 @@ async Task CreateDefaultAdminUser(IServiceProvider serviceProvider)
     {
         var user = new User
         {
-            UserName = "admin",
-            Email = "admin@admin.pl",
+            UserName = "admin123",
+            Email = "admin123@admin.pl",
             IsAdmin = true
         };
 

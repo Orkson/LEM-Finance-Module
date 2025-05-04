@@ -10,9 +10,11 @@ export class AuthService {
   private usersSubject = new BehaviorSubject<any[]>([]);
   public users$ = this.usersSubject.asObservable();
   private apiUrl = environment.apiUrl;
-  private loggedInSubject = new BehaviorSubject<boolean>(this.hasToken());
+  private loggedInSubject = new BehaviorSubject<boolean>(false);
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) {
+	  this.loggedInSubject.next(this.hasToken())
+  }
 
   login(username: string, password: string): Observable<string> {
     return this.http.post<{ token: string }>(`${this.apiUrl}/login`, { username, password })

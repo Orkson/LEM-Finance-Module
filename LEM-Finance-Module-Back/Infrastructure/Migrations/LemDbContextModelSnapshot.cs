@@ -115,6 +115,72 @@ namespace Infrastructure.Migrations
                     b.ToTable("Documents");
                 });
 
+            modelBuilder.Entity("Domain.Entities.ExchangeRate", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CurrencyCode")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("RateToBase")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ExchangeRates");
+                });
+
+            modelBuilder.Entity("Domain.Entities.ExpensePlanner", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Currency")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("DeviceId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal>("GrossPrice")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("NetPrice")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("PlannedDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("ServiceId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Status")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("StorageLocationName")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("Tax")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DeviceId");
+
+                    b.HasIndex("ServiceId");
+
+                    b.ToTable("ExpensePlanner");
+                });
+
             modelBuilder.Entity("Domain.Entities.MeasuredRange", b =>
                 {
                     b.Property<int>("Id")
@@ -224,6 +290,20 @@ namespace Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("PhysicalMagnitudes");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Service", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ServiceName")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Service");
                 });
 
             modelBuilder.Entity("Domain.Entities.User", b =>
@@ -447,6 +527,21 @@ namespace Infrastructure.Migrations
                     b.Navigation("Device");
 
                     b.Navigation("Model");
+                });
+
+            modelBuilder.Entity("Domain.Entities.ExpensePlanner", b =>
+                {
+                    b.HasOne("Domain.Entities.Device", "Device")
+                        .WithMany()
+                        .HasForeignKey("DeviceId");
+
+                    b.HasOne("Domain.Entities.Service", "Service")
+                        .WithMany()
+                        .HasForeignKey("ServiceId");
+
+                    b.Navigation("Device");
+
+                    b.Navigation("Service");
                 });
 
             modelBuilder.Entity("Domain.Entities.MeasuredRange", b =>
