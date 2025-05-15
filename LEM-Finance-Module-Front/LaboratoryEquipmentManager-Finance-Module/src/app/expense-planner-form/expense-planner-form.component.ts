@@ -24,8 +24,8 @@ export class ExpensePlannerFormComponent implements OnInit {
       plannedDate: ['', Validators.required],
       storageLocationName: [''],
       netPrice: [0, [Validators.required, Validators.min(0)]],
-      grossPrice: [0, [Validators.required, Validators.min(0)]],
-      tax: [0, [Validators.required, Validators.min(0)]],
+      grossPrice: [{ value: 0, disabled: true }],
+      tax: [23, [Validators.required, Validators.min(0)]],
       currency: ['PLN', Validators.required],
       description: [''],
       status: ['Planned', Validators.required],
@@ -34,6 +34,27 @@ export class ExpensePlannerFormComponent implements OnInit {
     });
   }
 
+  currentExchangeRate: number = 1;
+
+  convertedValues = {
+    netPricePLN: 0,
+    grossPricePLN: 0,
+    taxPLN: 0
+  };
+
+  currencies = [
+    { code: 'PLN', name: 'Polski złoty' },
+    { code: 'EUR', name: 'Euro' },
+    { code: 'USD', name: 'Dolar amerykański' },
+    { code: 'GBP', name: 'Funt szterling' },
+    { code: 'CHF', name: 'Frank szwajcarski' },
+    { code: 'JPY', name: 'Jen japoński' },
+    { code: 'CZK', name: 'Korona czeska' },
+    { code: 'SEK', name: 'Korona szwedzka' },
+    { code: 'NOK', name: 'Korona norweska' },
+    { code: 'DKK', name: 'Korona duńska' }
+  ];
+  
   ngOnInit() {
     this.expenseId = +this.route.snapshot.paramMap.get('id')!;
 
@@ -41,17 +62,77 @@ export class ExpensePlannerFormComponent implements OnInit {
      this.services = data});
     this.apiService.getDevice().subscribe(data =>{
      this.devices = data.items});
+    this.form.valueChanges.subscribe(() => {
+     this.calculatePrices();
+    });
+
+    this.form.valueChanges.subscribe(() => {
+      this.calculatePrices();
+    });
+    this.form.get('currency')!.valueChanges.subscribe(currency => {
+      this.updateExchangeRate(currency);
+
+    this.form.get('netPrice')!.valueChanges.subscribe(() => this.calculatePrices());
+    this.form.get('tax')!.valueChanges.subscribe(() => this.calculatePrices());
+
+    this.calculatePrices();
 
     if (this.expenseId) {
       this.apiService.getExpensesByYear(new Date().getFullYear())
         .subscribe(expenses => {
           const expense = expenses.find(e => e.id === this.expenseId);
-          if (expense) this.form.patchValue(expense);
+          if (expense) {
+            this.form.patchValue(expense, { emitEvent: false });
+            this.updateExchangeRate(expense.currency);
+          }
         });
+      }
+    });
+  }
+
+  calculatePrices() {
+    const net = this.form.value.netPrice || 0;
+    const vatRate = this.form.value.tax || 0;
+
+    const gross = net * (1 + vatRate / 100);
+    this.form.get('grossPrice')!.setValue(gross.toFixed(2), { emitEvent: false });
+
+    this.convertedValues = {
+      netPricePLN: net * this.currentExchangeRate,
+      grossPricePLN: gross * this.currentExchangeRate,
+      taxPLN: (gross - net) * this.currentExchangeRate
+    };
+  }
+
+  updateExchangeRate(currency: string): void {
+    if (currency && currency !== 'PLN') {
+      this.apiService.getExchangeRate(currency).subscribe({
+        next: (response: { currency: string, rate: number }) => {
+          this.currentExchangeRate = response.rate;
+          this.calculatePrices();
+        },
+        error: (error: any) => {
+          console.error("Błąd pobierania kursu", error);
+          this.currentExchangeRate = 1;
+        }
+      });
+    } else {
+      this.currentExchangeRate = 1;
+      this.calculatePrices();
     }
   }
 
   onSubmit() {
+    const formValues = this.form.value;
+
+  const expense = {
+    ...formValues,
+    exchangeRate: this.currentExchangeRate,
+    netPricePLN: this.convertedValues.netPricePLN,
+    grossPricePLN: this.convertedValues.grossPricePLN,
+    taxPLN: this.convertedValues.taxPLN
+  };
+
     if (this.expenseId) {
       this.apiService.updateExpense(this.expenseId, this.form.value)
         .subscribe(() => this.router.navigate(['/expense-planner-list']));

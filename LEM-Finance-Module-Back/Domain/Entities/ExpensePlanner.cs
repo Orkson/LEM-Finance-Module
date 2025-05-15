@@ -9,6 +9,10 @@
         public decimal GrossPrice { get; set; }
         public decimal Tax { get; set; }
         public string? Currency { get; set; }
+        public decimal? ExchangeRate { get; set; }
+        public decimal? NetPricePLN { get; set; }
+        public decimal? GrossPricePLN { get; set; }
+        public decimal? TaxPLN { get; set; }
         public string? Description { get; set; }
         public string? Status { get; set; }
         public int? ServiceId { get; set; }

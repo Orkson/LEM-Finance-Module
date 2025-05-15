@@ -9,7 +9,7 @@
 
     <div class="form-group">
       <label>Laboratorium:</label>
-      <input type="text" formControlName="storageLocationName" placeholder="Enter storage location" />
+      <input type="text" formControlName="storageLocationName" placeholder="Wybierz miejsce przechowywania" />
     </div>
 
     <div class="form-row">
@@ -29,18 +29,22 @@
       </div>
     </div>
 
-    <div class="form-group">
-      <label>Waluta:</label>
-      <select formControlName="currency">
-        <option value="PLN">PLN</option>
-        <option value="EUR">EUR</option>
-        <option value="USD">USD</option>
-      </select>
+      <div class="form-group">
+        <label>Waluta:</label>
+        <select formControlName="currency">
+          <option *ngFor="let curr of currencies" [value]="curr.code">
+            {{ curr.code }} - {{ curr.name }}
+          </option>
+        </select>
+      </div>
+
+    <div class="exchange-rate-info" *ngIf="form.value.currency !== 'PLN'">
+      <strong>Kurs {{ form.value.currency }}:</strong> {{ currentExchangeRate | number:'1.4-4' }} PLN
     </div>
 
     <div class="form-group">
       <label>Opis:</label>
-      <textarea formControlName="description" placeholder="Enter description"></textarea>
+      <textarea formControlName="description" placeholder="Podaj opis wydatku"></textarea>
     </div>
 
     <div class="form-group">
@@ -68,6 +72,13 @@
           {{ device.modelName }} {{ device.deviceIdentificationNumber }})
         </option>
       </select>
+    </div>
+
+    <div class="pln-summary" *ngIf="form.value.currency !== 'PLN'">
+      <h4>Podsumowanie w PLN:</h4>
+      <p>Cena netto: <strong>{{ convertedValues.netPricePLN | currency:'PLN':'symbol':'1.2-2' }}</strong></p>
+      <p>Cena brutto: <strong>{{ convertedValues.grossPricePLN | currency:'PLN':'symbol':'1.2-2' }}</strong></p>
+      <p>Podatek VAT: <strong>{{ convertedValues.taxPLN | currency:'PLN':'symbol':'1.2-2' }}</strong></p>
     </div>
 
     <div class="form-actions">

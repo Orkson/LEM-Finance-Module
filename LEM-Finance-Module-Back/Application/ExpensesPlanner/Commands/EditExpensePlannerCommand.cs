@@ -15,5 +15,8 @@ namespace Application.ExpensesPlanner.Commands
         public string? Status { get; set; }
         public int ServiceId { get; set; }
         public int DeviceId { get; set; }
+        public decimal? NetPricePLN { get; set; }
+        public decimal? GrossPricePLN { get; set; }
+        public decimal? TaxPLN { get; set; }
     }
 }

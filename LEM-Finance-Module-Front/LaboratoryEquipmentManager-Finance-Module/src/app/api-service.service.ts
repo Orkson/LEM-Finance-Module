@@ -119,6 +119,10 @@ export class ApiServiceService {
   getDevice(): Observable<any> {
     return this.http.get<any>(this.apiUrl + 'devices');
   }
+
+  getExchangeRate(currencyCode: string): Observable<{ currency: string, rate: number }> {
+    return this.http.get<{ currency: string, rate: number }>(`${this.apiUrl}currency/${currencyCode}`);
+  }
 }
 
 export class AddDeviceDto {

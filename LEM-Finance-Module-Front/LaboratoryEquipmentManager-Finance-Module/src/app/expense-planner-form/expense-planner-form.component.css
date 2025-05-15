@@ -95,4 +95,21 @@
   .btn:hover:not(:disabled) {
     opacity: 0.8;
   }
+
+  .exchange-rate-info, .pln-summary {
+    background-color: #f1f9ff;
+    border: 1px solid #bcdff1;
+    border-radius: 6px;
+    padding: 10px 15px;
+    margin-top: 15px;
+    color: #31708f;
+  }
+  
+  .pln-summary h4 {
+    margin-top: 0;
+  }
+  
+  .pln-summary p {
+    margin: 5px 0;
+  }
   

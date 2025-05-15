@@ -26,6 +26,9 @@ namespace Application.ExpensesPlanner.Commands
                 Device = await _repository.GetDeviceByIdAsync(request.DeviceId),
                 StorageLocationName = request.StorageLocationName,
                 Tax = request.Tax,
+                NetPricePLN = request.NetPricePLN,
+                GrossPricePLN = request.GrossPricePLN,
+                TaxPLN = request.TaxPLN,
             };
 
             return await _repository.AddPlannerAsync(planner);

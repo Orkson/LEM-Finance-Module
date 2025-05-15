@@ -1,13 +1,6 @@
-﻿using Application.Models;
-using AutoMapper;
+﻿using AutoMapper;
 using Domain.Abstraction;
-using Domain.Entities;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.ExpensesPlanner.Commands
 {
@@ -39,6 +32,9 @@ namespace Application.ExpensesPlanner.Commands
             expensePlanner.Status = request.Status;
             expensePlanner.Service = await _repository.GetServiceByIdAsync(request.ServiceId);
             expensePlanner.Device = await _repository.GetDeviceByIdAsync(request.DeviceId);
+            expensePlanner.NetPricePLN = request.NetPricePLN;
+            expensePlanner.GrossPricePLN = request.GrossPricePLN;
+            expensePlanner.TaxPLN = request.TaxPLN;
 
             await _repository.UpdatePlannerAsync(expensePlanner);
         }
