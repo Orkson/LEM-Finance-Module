@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://inwentorium.dyplomy.iem.pw.edu.pl/api'
+  apiUrl: 'http://localhost:5000/api'
 };
