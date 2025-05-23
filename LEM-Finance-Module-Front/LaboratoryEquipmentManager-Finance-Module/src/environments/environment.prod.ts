@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://lem-finance-module.azurewebsites.net/api'
+  apiUrl: 'https://inwentorium.dyplomy.iem.pw.edu.pl/api'
 };
