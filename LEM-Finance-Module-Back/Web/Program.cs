@@ -53,7 +53,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowConfiguredOrigins",
         policy =>
         {
-            var allowedOrigins = configuration.GetSection("Cors:AllowedOrigins").Value;
+            var allowedOrigins = configuration.GetSection("Cors:AllowedOrigins").Value?.Split(',', StringSplitOptions.RemoveEmptyEntries);
             policy.WithOrigins(allowedOrigins)
                  .AllowAnyHeader()
                  .AllowAnyMethod()
