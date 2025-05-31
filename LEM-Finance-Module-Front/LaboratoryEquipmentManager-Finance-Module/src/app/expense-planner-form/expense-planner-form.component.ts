@@ -39,6 +39,8 @@ export class ExpensePlannerFormComponent implements OnInit {
   convertedValues = {
     netPricePLN: 0,
     grossPricePLN: 0,
+    netPrice: 0,
+    grossPrice: 0,
     taxPLN: 0
   };
 
@@ -100,6 +102,8 @@ export class ExpensePlannerFormComponent implements OnInit {
     this.convertedValues = {
       netPricePLN: net * this.currentExchangeRate,
       grossPricePLN: gross * this.currentExchangeRate,
+      netPrice: net,
+      grossPrice: gross,
       taxPLN: (gross - net) * this.currentExchangeRate
     };
   }
@@ -130,14 +134,16 @@ export class ExpensePlannerFormComponent implements OnInit {
     exchangeRate: this.currentExchangeRate,
     netPricePLN: this.convertedValues.netPricePLN,
     grossPricePLN: this.convertedValues.grossPricePLN,
+    netPrice: this.convertedValues.netPrice,
+    grossPrice: this.convertedValues.grossPrice,
     taxPLN: this.convertedValues.taxPLN
   };
 
     if (this.expenseId) {
-      this.apiService.updateExpense(this.expenseId, this.form.value)
+      this.apiService.updateExpense(this.expenseId, expense)
         .subscribe(() => this.router.navigate(['/expense-planner-list']));
     } else {
-      this.apiService.createExpense(this.form.value)
+      this.apiService.createExpense(expense)
         .subscribe(() => this.router.navigate(['/expense-planner-list']));
     }
   }

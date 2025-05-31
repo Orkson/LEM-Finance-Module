@@ -134,6 +134,19 @@
   height: 15px;
   background-color: transparent;
   border: none;
+  }
+
+  td.currency-original {
+  color: #555;
+  font-style: italic;
+  }
+  .table-responsive {
+  overflow-x: auto;
+  width: 100%;
+  }
+  td .btn-group {
+  white-space: nowrap;
 }
+
 
   
