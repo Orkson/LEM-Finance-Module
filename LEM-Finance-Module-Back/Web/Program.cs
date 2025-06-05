@@ -80,6 +80,8 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+builder.WebHost.UseUrls("http://0.0.0.0:5000");
+
 var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())
@@ -113,6 +115,11 @@ app.UseHttpsRedirection();
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseDefaultFiles();
+app.UseStaticFiles();
+app.MapFallbackToFile("index.html");
+
 app.MapControllers();
 app.Run();
 
