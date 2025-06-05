@@ -12,6 +12,7 @@ using System.Text.Json.Serialization;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.WebHost.UseUrls("http://0.0.0.0:5000");
 var configuration = builder.Configuration;
 
 builder.Configuration.AddEnvironmentVariables();
@@ -79,8 +80,6 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
     };
 });
-
-builder.WebHost.UseUrls("http://0.0.0.0:5000");
 
 var app = builder.Build();
 
