@@ -110,7 +110,7 @@ if (app.Environment.IsDevelopment())
 var allowedOrigins = configuration.GetSection("Cors:AllowedOrigins").Value;
 Console.WriteLine($"Allowed Origins: {allowedOrigins}");
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
