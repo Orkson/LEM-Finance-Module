@@ -84,7 +84,32 @@ namespace Infrastructure.Repositories
 
         public async Task RemoveModelById(int modelId, CancellationToken cancellationToken)
         {
-            var modelToBeRemoved = await _dbContext.Models.Include(x => x.Documents).FirstAsync(x => x.Id == modelId);
+            var modelToBeRemoved = await _dbContext.Models
+                .Include(x => x.Documents)
+                .Include(x => x.CooperateFrom)
+                .Include(x => x.CooperateTo)
+                .Include(x => x.MeasuredValues)
+                .Include(x => x.Devices)
+                .FirstAsync(x => x.Id == modelId, cancellationToken);
+
+            var cooperateToRecords = await _dbContext.ModelCooperation
+                .Where(mc => mc.ModelToId == modelId)
+                .ToListAsync(cancellationToken);
+            _dbContext.ModelCooperation.RemoveRange(cooperateToRecords);
+
+            foreach (var device in modelToBeRemoved.Devices)
+            {
+                var expensePlanners = await _dbContext.ExpensePlanner
+                    .Where(ep => ep.DeviceId == device.Id)
+                    .ToListAsync(cancellationToken);
+                _dbContext.ExpensePlanner.RemoveRange(expensePlanners);
+            }
+
+            _dbContext.Documents.RemoveRange(modelToBeRemoved.Documents);
+            _dbContext.ModelCooperation.RemoveRange(modelToBeRemoved.CooperateTo);
+            _dbContext.ModelCooperation.RemoveRange(modelToBeRemoved.CooperateFrom);
+            _dbContext.MeasuredValues.RemoveRange(modelToBeRemoved.MeasuredValues);
+
             _dbContext.Models.Remove(modelToBeRemoved);
             await _dbContext.SaveChangesAsync(cancellationToken);
         }

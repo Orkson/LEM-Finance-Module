@@ -96,16 +96,31 @@ export class ExpensePlannerFormComponent implements OnInit {
     const net = this.form.value.netPrice || 0;
     const vatRate = this.form.value.tax || 0;
 
-    const gross = net * (1 + vatRate / 100);
+    const netPricePLN = net * this.currentExchangeRate;
+
+    const taxPLN = netPricePLN * (vatRate / 100);
+
+    const grossPricePLN = netPricePLN + taxPLN;
+
+    const gross = grossPricePLN / this.currentExchangeRate;
+
+    //const gross = net * (1 + vatRate / 100);
     this.form.get('grossPrice')!.setValue(gross.toFixed(2), { emitEvent: false });
 
     this.convertedValues = {
-      netPricePLN: net * this.currentExchangeRate,
-      grossPricePLN: gross * this.currentExchangeRate,
-      netPrice: net,
-      grossPrice: gross,
-      taxPLN: (gross - net) * this.currentExchangeRate
+    netPrice: net,
+    grossPrice: gross,
+    netPricePLN: netPricePLN,
+    grossPricePLN: grossPricePLN,
+    taxPLN: taxPLN
     };
+    //this.convertedValues = {
+    //  netPricePLN: net * this.currentExchangeRate,
+    //  grossPricePLN: gross * this.currentExchangeRate,
+    //  netPrice: net,
+    //  grossPrice: gross,
+    //  taxPLN: (gross - net) * this.currentExchangeRate
+    //};
   }
 
   updateExchangeRate(currency: string): void {

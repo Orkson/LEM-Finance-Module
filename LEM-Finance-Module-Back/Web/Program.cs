@@ -23,7 +23,6 @@ if (string.IsNullOrEmpty(jwtKey))
     throw new InvalidOperationException("JWT Key is missing. Ensure 'Jwt:Key' is set in environment variables or appsettings.json.");
 }
 
-// Add services to the container.
 builder.Services.AddIdentity<User, IdentityRole>()
     .AddEntityFrameworkStores<LemDbContext>()
     .AddDefaultTokenProviders();
@@ -101,7 +100,6 @@ if (dbContext.Database.GetPendingMigrations().Any())
 
 await CreateDefaultAdminUser(scope.ServiceProvider);
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -110,7 +108,6 @@ if (app.Environment.IsDevelopment())
 var allowedOrigins = configuration.GetSection("Cors:AllowedOrigins").Value;
 Console.WriteLine($"Allowed Origins: {allowedOrigins}");
 
-//app.UseHttpsRedirection();
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
