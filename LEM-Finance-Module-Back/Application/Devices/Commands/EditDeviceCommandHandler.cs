@@ -29,38 +29,37 @@ namespace Application.Devices.Commands
         {
             var device = await _deviceRepository.GetDeviceById(request.deviceId, cancellationToken);
 
-            var oldValues = request.oldDeviceDto;
             var newValues = request.newDeviceDto;
 
-            if (oldValues.IdentificationNumber != newValues.IdentificationNumber)
+            if (device?.IdentificationNumber != newValues.IdentificationNumber)
             {
                 device.IdentificationNumber = newValues.IdentificationNumber;
             }
-            if (oldValues.ProductionDate != newValues.ProductionDate)
+            if (device?.ProductionDate != newValues.ProductionDate)
             {
                 device.ProductionDate = newValues.ProductionDate;
             }
-            if (oldValues.CalibrationPeriodInYears != newValues.CalibrationPeriodInYears)
+            if (device?.CalibrationPeriodInYears != newValues.CalibrationPeriodInYears)
             {
                 device.CalibrationPeriodInYears = newValues.CalibrationPeriodInYears;
             }
-            if (oldValues.LastCalibrationDate != newValues.LastCalibrationDate)
+            if (device?.LastCalibrationDate != newValues.LastCalibrationDate)
             {
                 device.LastCalibrationDate = newValues.LastCalibrationDate;
             }
-            if (oldValues.NextCalibrationDate != newValues.NextCalibrationDate)
+            if (device?.NextCalibrationDate != newValues.NextCalibrationDate)
             {
                 device.NextCalibrationDate = newValues.NextCalibrationDate;
             }
-            if (oldValues.IsCalibrated != newValues.IsCalibrated)
+            if (device?.IsCalibrated != newValues.IsCalibrated)
             {
                 device.IsCalibrated = newValues.IsCalibrated;
             }
-            if (oldValues.IsCalibrationCloseToExpire != newValues.IsCalibrationCloseToExpire)
+            if (device?.IsCalibrationCloseToExpire != newValues.IsCalibrationCloseToExpire)
             {
                 device.IsCalibrationCloseToExpire = newValues.IsCalibrationCloseToExpire;
             }
-            if (oldValues.StorageLocation != newValues.StorageLocation)
+            if (device?.StorageLocation != newValues.StorageLocation)
             {
                 device.StorageLocation = newValues.StorageLocation;
             }
@@ -69,12 +68,16 @@ namespace Application.Devices.Commands
 
             try
             {
-                device.ModelId = await HandleModelEditionAsync(device.Model, newValues.Model, request.modelCooperationsToBeRemoved);
-
                 var newMappedDevice = _mapper.Map<Device>(device);
+
+                if (device.NextCalibrationDate == null && device.CalibrationPeriodInYears != null && device.LastCalibrationDate != null)
+                {
+                    device.NextCalibrationDate = SetNextCalibrationDate(request.newDeviceDto);
+                }
+
                 await _deviceRepository.UpdateDeviceAsync(request.deviceId, newMappedDevice, cancellationToken);
                 transaction.Commit();
-                var result = new EditedDeviceResponseDto(newMappedDevice.IdentificationNumber, newMappedDevice.ModelId, newMappedDevice.Id);
+                var result = new EditedDeviceResponseDto(newMappedDevice.IdentificationNumber, newMappedDevice.Id);
                 return result;
             }
             catch (Exception ex)
@@ -98,5 +101,7 @@ namespace Application.Devices.Commands
                 return await _sender.Send(new CreateModelCommand(newModel));
             }
         }
+
+        private DateTime SetNextCalibrationDate(EditDeviceDto editDeviceDto) => editDeviceDto.LastCalibrationDate.Value.AddYears(editDeviceDto.CalibrationPeriodInYears.Value);
     }
 }

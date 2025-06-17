@@ -24,12 +24,12 @@ namespace Application.Models.Queries
         public async Task<ModelDetailsDto> Handle(GetModelDetailsQuery request, CancellationToken cancellationToken)
         {
             var model = await _modelRepository.GetModelById(request.modelId, cancellationToken);
-            var modelsWithNameCount = _deviceRepository.TotalDevicesByModelCount(request.modelName);
+            //var modelsWithNameCount = _deviceRepository.TotalDevicesByModelCount(request.modelName);
 
             var modelDetailsDto = new ModelDetailsDto
             {
                 Id = model.Id,
-                TotalModelCount = modelsWithNameCount,
+                //TotalModelCount = modelsWithNameCount,
                 Name = model.Name,
                 SerialNumber = model.SerialNumber,
                 CompanyName = model.Company?.Name,
@@ -41,10 +41,10 @@ namespace Application.Models.Queries
         }
 
         //TODO: move to separate repository
-        private List<MeasuredValueDto> GetMeasuredValues(int modelId)
+        private List<MeasuredValueDto> GetMeasuredValues(int deviceId)
         {
             var measuredValues = _dbContext.MeasuredValues
-                .Where(x => x.ModelId == modelId)
+                .Where(x => x.DeviceId == deviceId)
                 .Select(x => new MeasuredValueDto
                 {
                     Id = x.Id,
@@ -62,9 +62,9 @@ namespace Application.Models.Queries
         }
 
         //TODO: move to separate repository
-        private ICollection<DocumentDto>? GetDocuments(int modelId)
+        private ICollection<DocumentDto>? GetDocuments(int deviceId)
         {
-            var modelDocuments = _dbContext.Documents.Where(x => x.ModelId == modelId).ToList();
+            var modelDocuments = _dbContext.Documents.Where(x => x.DeviceId == deviceId).ToList();
             if (!modelDocuments.Any())
             {
                 return null;

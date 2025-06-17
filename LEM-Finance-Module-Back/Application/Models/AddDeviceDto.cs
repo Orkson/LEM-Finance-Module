@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Domain.Entities;
+using Microsoft.AspNetCore.Http;
 
 namespace Application.Models
 {
@@ -12,6 +13,8 @@ namespace Application.Models
         public bool? IsCalibrated { get; set; }
         public bool? IsCalibrationCloseToExpire { get; set; }
         public string? StorageLocation { get; set; }
-        public ModelDto Model { get; set; }
+        public string Model { get; set; }
+        public virtual Company Company { get; set; }
+        public string SerialNumber { get; set; }
     }
 }

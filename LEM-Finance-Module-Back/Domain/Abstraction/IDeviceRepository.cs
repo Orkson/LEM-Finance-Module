@@ -9,6 +9,6 @@ namespace Domain.Abstraction
         Task<Device> GetDeviceById(int id, CancellationToken cancellationToken);
         Task UpdateDeviceAsync(int deviceId, Device newDevice, CancellationToken cancellationToken);
         Task RemoveDeviceById(int deviceId, CancellationToken cancellationToken);
-        int TotalDevicesByModelCount(string modelName);
+        //int TotalDevicesByModelCount(string modelName);
     }
 }

@@ -16,7 +16,7 @@
       <div class="row">
         <div class="mb-3 row alig-items-center">
           <label for="identificationNumber" class="col-sm-3 col-form-label"
-            >Numer identyfikacyjny urządzenia</label
+            >Nazwa urządzenia</label
           >
           <div class="col-sm-9">
             <input
@@ -30,16 +30,41 @@
             </div>
           </div>
         </div>
-        <div class="mb-3 row">
-          <label for="productionDate" class="col-sm-3 col-form-label"
-            >Data produkcji</label
+
+        <div class="mb-3 row" formGroupName="model">
+          <label for="company" class="col-sm-3 col-form-label">Producent</label>
+          <div class="col-sm-9">
+            <input
+              type="text"
+              class="form-control"
+              id="company"
+              formControlName="companyName"
+            />
+          </div>
+        </div>
+
+        <div class="mb-3 row" formGroupName="model">
+          <label for="model" class="col-sm-3 col-form-label">Model</label>
+          <div class="col-sm-9">
+            <input
+              type="text"
+              class="form-control"
+              id="model"
+              formControlName="name"
+            />
+          </div>
+        </div>
+
+        <div class="mb-3 row" formGroupName="model">
+          <label for="serialNumber" class="col-sm-3 col-form-label"
+            >Numer seryjny</label
           >
           <div class="col-sm-9">
             <input
-              type="date"
+              type="text"
               class="form-control"
-              id="productionDate"
-              formControlName="productionDate"
+              id="serialNumber"
+              formControlName="serialNumber"
             />
           </div>
         </div>
@@ -67,19 +92,6 @@
               id="calibrationPeriod"
               formControlName="calibrationPeriodInYears"
               min="1"
-            />
-          </div>
-        </div>
-        <div class="mb-3 row">
-          <label for="nextCalibrationDate" class="col-sm-3 col-form-label"
-            >Data najbliższej kalibracji</label
-          >
-          <div class="col-sm-9">
-            <input
-              type="date"
-              class="form-control"
-              id="nextCalibrationDate"
-              formControlName="nextCalibrationDate"
             />
           </div>
         </div>
@@ -115,69 +127,7 @@
           </div>
         </div>
       </div>
-      <h4>Model</h4>
-      <div class="alert alert-info" role="alert">
-        <b>&#9432;</b> Dodając nowe urządzenie, możesz wybrać dla niego
-        istniejący model z listy podpowiedzi. W takim przypadku zostaną dla
-        niego podstawione wszystkie aktualne dane. Dane danego modelu możesz
-        zmienić na ekranie edycji urządzenia.
-      </div>
       <div formGroupName="model">
-        <button
-          class="btn btn-warning"
-          *ngIf="modelSelected"
-          (click)="resetModelSelection()"
-        >
-          Resetuj podstawienie
-        </button>
-        <div class="mb-3 row">
-          <label for="name" class="col-sm-3 col-form-label">Nazwa modelu</label>
-          <div class="col-sm-9">
-            <input
-              [ngbTypeahead]="searchModelName"
-              (selectItem)="onModelNameSelect($event)"
-              type="text"
-              class="form-control"
-              id="name"
-              formControlName="name"
-              placeholder="Wpisz nazwę lub wybierz z listy proponowanych po rozpoczęciu wpisywania"
-              [attr.disabled]="modelNameInputDisabled"
-            />
-            <div *ngIf="shouldShowError('model.name')" class="error">
-              {{ fieldRequired }}
-            </div>
-          </div>
-        </div>
-        <div class="mb-3 row">
-          <label for="serialNumber" class="col-sm-3 col-form-label"
-            >Numer seryjny</label
-          >
-          <div class="col-sm-9">
-            <input
-              [ngbTypeahead]="serchModelSerialNumber"
-              placeholder="Wpisz numer lub wybierz z listy proponowanych po rozpoczęciu wpisywania"
-              (selectItem)="onModelSerialNumberSelect($event)"
-              type="text"
-              class="form-control"
-              id="serialNumber"
-              formControlName="serialNumber"
-            />
-            <div *ngIf="shouldShowError('model.serialNumber')" class="error">
-              {{ fieldRequired }}
-            </div>
-          </div>
-        </div>
-        <div class="mb-3 row">
-          <label for="company" class="col-sm-3 col-form-label">Producent</label>
-          <div class="col-sm-9">
-            <input
-              type="text"
-              class="form-control"
-              id="company"
-              formControlName="companyName"
-            />
-          </div>
-        </div>
         <h5>Wartości mierzone</h5>
         <div formArrayName="measuredValues">
           <div
@@ -298,23 +248,6 @@
           >
             Dodaj wartość mierzoną
           </button>
-        </div>
-        <div class="mb-3">
-          <label for="modelDocuments" class="form-label"
-            >Dokumenty modelu</label
-          >
-          <input
-            formControlName="documents"
-            class="form-control"
-            type="file"
-            id="modelDocuments"
-            multiple
-            (change)="onModelFileChange($event)"
-          />
-          <div id="modelDocumentsHelpBlock" class="form-text">
-            Dokuemnty dotyczące modelu w formacie .pdf, .csv, .jpg (np.
-            instrukcja obsługi)
-          </div>
         </div>
       </div>
     </form>

@@ -66,11 +66,11 @@ export class ExpensePlannerListComponent implements OnInit {
       this.summary[status] = { net: 0, gross: 0 };
       }
 
-      this.summary[status].net += expense.netPrice;
-      this.summary[status].gross += expense.grossPrice;
+      this.summary[status].net += expense.netPricePLN;
+      this.summary[status].gross += expense.grossPricePLN;
 
-      this.totalNet += expense.netPrice;
-      this.totalGross += expense.grossPrice;
+      this.totalNet += expense.netPricePLN;
+      this.totalGross += expense.grossPricePLN;
   });
   }
 }

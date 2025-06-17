@@ -28,7 +28,7 @@ namespace Infrastructure.Repositories
             foreach (var document in documents)
             {
                 documentNames.Add(document.Name);
-                document.ModelId = modelId;
+                //document.ModelId = modelId;
                 document.DeviceId = deviceId;
             }
 
@@ -38,9 +38,9 @@ namespace Infrastructure.Repositories
             return documentNames;
         }
 
-        public Task<Document> GetFileByModelId(int modelId)
+        public Task<Document> GetFileByDeviceId(int deviceId)
         {
-            return _dbContext.Documents.FirstAsync(x => x.ModelId == modelId);
+            return _dbContext.Documents.FirstAsync(x => x.DeviceId == deviceId);
         }
 
         public Task<List<Document>> GetDocumentsByName(string documentName)

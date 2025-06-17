@@ -15,29 +15,23 @@
           <th>Urządzenie</th>
         </tr>
         <tr>
-          <th>Id:</th>
-          <td>{{ deviceDto.deviceId ?? "--" }}</td>
-        </tr>
-        <tr>
-          <th>Numer identyfikacyjny urządzenia:</th>
+          <th>Nazwa urządzenia:</th>
           <td>{{ deviceDto.deviceIdentificationNumber ?? "--" }}</td>
         </tr>
         <tr>
-          <th>Data produkcji:</th>
-          <td>
-            {{
-              deviceDto.productionDate
-                ? (deviceDto.productionDate | date : "dd.MM.yyyy")
-                : "--"
-            }}
-          </td>
+          <th>Producent:</th>
+          <td>{{ deviceDto.producer ?? "--" }}</td>
         </tr>
         <tr>
-          <th>Skalibrowany:</th>
-          <td>{{ deviceDto.isCalibrated ? "TAK" : "NIE" }}</td>
+          <th>Model:</th>
+          <td>{{ deviceDto.model ?? "--" }}</td>
         </tr>
         <tr>
-          <th>Ostatnia data kalibracji:</th>
+          <th>Numer seryjny:</th>
+          <td>{{ deviceDto.serialNumber ?? "--" }}</td>
+        </tr>
+        <tr>
+          <th>Data ostatniej kalibracji:</th>
           <td>
             {{
               deviceDto.lastCalibrationDate
@@ -47,8 +41,19 @@
           </td>
         </tr>
         <tr>
-          <th>Okres kalibracji (lata):</th>
-          <td>{{ deviceDto.calibrationPeriodInYears ?? "--" }}</td>
+          <th>Okres między wzorcowaniami [lata]:</th>
+          <td>
+            {{ deviceDto.calibrationPeriodInYears ?? "--" }}
+          </td>
+        </tr><tr>
+          <th>Data najbliższej kalibracji:</th>
+          <td>
+            {{ 
+              deviceDto.estimatedCalibrationDate
+                ? (deviceDto.estimatedCalibrationDate | date : "dd.MM.yyyy")
+                : "--"
+            }}
+          </td>
         </tr>
         <tr>
           <th>Miejsce przechowywania:</th>
@@ -67,41 +72,7 @@
           </td>
         </tr>
         <tr>
-          <td></td>
-        </tr>
-        <tr>
-          <th>Model</th>
-        </tr>
-        <tr>
-          <th>Nazwa modelu:</th>
-          <td>{{ deviceDto.modelName ?? "--" }}</td>
-        </tr>
-        <tr>
-          <th>Numer seryjny modelu:</th>
-          <td>{{ deviceDto.modelSerialNumber ?? "--" }}</td>
-        </tr>
-        <tr>
-          <th>Ilość urządzeń danego modelu w bazie:</th>
-          <td>{{ deviceDto.totalDevicesOfModelCount }}</td>
-        </tr>
-        <tr>
-          <th>Producent:</th>
-          <td>{{ deviceDto.producer ?? "--" }}</td>
-        </tr>
-        <tr>
-          <th>Dokumenty modelu:</th>
-          <td>
-            <div *ngFor="let modelDocument of modelDocuments">
-              <a
-                href=""
-                (click)="downloadFile(modelDocument, $event, 'model')"
-                >{{ modelDocument.name }}</a
-              >
-            </div>
-          </td>
-        </tr>
-        <tr>
-          <th>Modele powiązane</th>
+          <th>Urządzenia powiązane</th>
           <td>
             <div *ngFor="let relatedModel of relatedModels">
               <a
@@ -118,8 +89,7 @@
     </table>
     <table
       class="table table-bordered border-secondary-subtle"
-      *ngIf="shouldDisplayMeasuredValuesTable"
-    >
+      *ngIf="shouldDisplayMeasuredValuesTable">
       <thead>
         <tr>
           <th scope="col" class="align-middle">Wartość mierzona</th>

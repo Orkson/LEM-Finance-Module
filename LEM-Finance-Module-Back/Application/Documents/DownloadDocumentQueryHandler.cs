@@ -19,10 +19,10 @@ namespace Application.Documents
             var documents = await _documentRepository.GetDocumentsByName(request.DocoumentName);
             var documentToDownload = new Domain.Entities.Document();
 
-            if (request.ModelId != null)
-            {
-                documentToDownload = documents.First(x => x.ModelId == request.ModelId);
-            }
+            //if (request.ModelId != null)
+            //{
+            //    documentToDownload = documents.First(x => x.ModelId == request.ModelId);
+            //}
 
             if (request.DeviceId != null)
             {

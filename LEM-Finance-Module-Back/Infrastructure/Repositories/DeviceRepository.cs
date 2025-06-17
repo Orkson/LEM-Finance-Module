@@ -2,6 +2,7 @@
 using Domain.Abstraction;
 using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using System.Threading;
 
 namespace Infrastructure.Repositories
 {
@@ -28,17 +29,26 @@ namespace Infrastructure.Repositories
             return result;
         }
 
-        public async Task<Device> GetDeviceById(int id, CancellationToken cancellationToken) => await _dbContext.Devices.Include(x => x.Model).ThenInclude(x => x.Company).FirstAsync(x => x.Id == id, cancellationToken);
+        public async Task<Device> GetDeviceById(int id, CancellationToken cancellationToken) => await _dbContext.Devices.Include(x => x.Company).FirstAsync(x => x.Id == id, cancellationToken);
 
         public async Task RemoveDeviceById(int deviceId, CancellationToken cancellationToken)
         {
             var deviceToBeRemoved = await GetDeviceById(deviceId, cancellationToken);
+
+            var costPlannerToBeRemoved = await GetExpensePlannersToRemove(deviceId, cancellationToken);
+
+            _dbContext.ExpensePlanner.RemoveRange(costPlannerToBeRemoved);
             _dbContext.Devices.Remove(deviceToBeRemoved);
+            
             await _dbContext.SaveChangesAsync(cancellationToken);
         }
 
-        public int TotalDevicesByModelCount(string modelName) => _dbContext.Devices.Include(x => x.Model).Where(x => x.Model.Name.ToLower() == modelName.ToLower()).Count();
-        
+        private async Task<List<ExpensePlanner>> GetExpensePlannersToRemove(int deviceId, CancellationToken cancellationToken)
+        {
+            return await _dbContext.ExpensePlanner
+                .Where(x => x.DeviceId == deviceId)
+                .ToListAsync(cancellationToken);
+        }
 
         public async Task UpdateDeviceAsync(int deviceId, Device newDevice, CancellationToken cancellationToken)
         {
@@ -51,8 +61,8 @@ namespace Infrastructure.Repositories
             device.IsCalibrated = newDevice.IsCalibrated;
             device.IsCalibrationCloseToExpire = newDevice.IsCalibrationCloseToExpire;
             device.StorageLocation = newDevice.StorageLocation;
-            device.Model = newDevice.Model;
-            device.ModelId = newDevice.ModelId;
+            //device.Model = newDevice.Model;
+            //device.ModelId = newDevice.ModelId;
             await _dbContext.SaveChangesAsync(cancellationToken);
         }
     }

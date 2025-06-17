@@ -76,7 +76,7 @@ namespace Infrastructure.Repositories
         {
             var result = await _dbContext.Models
                 .Include(x => x.Devices)
-                .Include(x => x.Company).ThenInclude(x => x.Models)
+                .Include(x => x.Company)//.ThenInclude(x => x.Models)
                 .FirstAsync(x => x.Id == modelId);
 
             return result;

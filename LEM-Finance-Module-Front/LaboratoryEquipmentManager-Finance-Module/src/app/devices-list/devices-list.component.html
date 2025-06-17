@@ -50,8 +50,9 @@
     <thead>
       <tr>
         <th scope="col" class="align-middle">
-          Numer identyfikacyjny urządzenia
+          Nazwa urządzenia
         </th>
+        <th scope="col" class="align-middle">Producent</th>
         <th
           scope="col"
           class="d-flex justify-content-between align-items-center"
@@ -66,9 +67,7 @@
           </button>
         </th>
         <th scope="col" class="align-middle">Numer Seryjny</th>
-        <th scope="col" class="align-middle">Wielkości mierzone</th>
         <th scope="col" class="align-middle">Miejsce przechowywania</th>
-        <th scope="col" class="align-middle">Data Produkcji</th>
         <th scope="col" class="align-middle">Data ostatniej kalibracji</th>
         <th
           scope="col"
@@ -94,17 +93,10 @@
         (click)="openDeviceDetails(device.deviceId)"
       >
         <td>{{ device.deviceIdentificationNumber ?? "--" }}</td>
-        <td>{{ device.modelName ?? "--" }}</td>
-        <td>{{ device.modelSerialNumber ?? "--" }}</td>
-        <td>{{ measuredValuesAsStringTab[i] }}</td>
+        <td>{{ device.producer ?? "--" }}</td>
+        <td>{{ device.model ?? "--" }}</td>
+        <td>{{ device.serialNumber ?? "--" }}</td>
         <td>{{ device.storageLocation ?? "--" }}</td>
-        <td>
-          {{
-            device.productionDate
-              ? (device.productionDate | date : "dd.MM.yyyy")
-              : "--"
-          }}
-        </td>
         <td>
           {{
             device.lastCalibrationDate

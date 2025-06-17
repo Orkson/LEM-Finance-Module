@@ -18,8 +18,7 @@ export enum TableName {
 })
 export class EditDeviceComponent implements AfterViewInit, OnInit {
   deviceToEdit: any;
-  deviceToBeEditedDto: any;
-
+  deviceToBeEditedDto: AddDeviceDto | null = null;
   deviceForm: FormGroup;
   deviceQuery = new PagedAndSortedQueryOfDevicesList();
   devices: any[] = [];
@@ -74,34 +73,35 @@ export class EditDeviceComponent implements AfterViewInit, OnInit {
 
   ngOnInit(): void {
     this.deviceToEdit = history.state.data;
+    console.log('Pełny obiekt deviceToEdit:', JSON.stringify(this.deviceToEdit, null, 2));
+    if (!this.deviceToEdit) {
+      alert('Brak danych urządzenia do edycji.');
+      this.navigateToDevicesList();
+      return;
+    }
     this.setOptionalAreasVisibility();
     this.setRelateModelsNamesToEdit(this.deviceToEdit.relatedModels);
-    let measuredValues = this.deviceToEdit.measuredValues;
-    this.initializeMeasuredValues(measuredValues);
-    this.bindOldValues();
+    this.initializeMeasuredValues(this.deviceToEdit.measuredValues);
     this.initializeEditedDeviceDocuments(this.deviceToEdit.deviceDocuments);
     this.initializeEditedModelDocuments(this.deviceToEdit.modelDocuments);
-    this.deviceToBeEditedDto = this.mapDeviceFormValuesToAddDeviceDto();
+    this.bindOldValues();
+    this.deviceToBeEditedDto = this.mapDeviceToEditToAddDeviceDto();
+    //this.deviceToBeEditedDto = this.mapDeviceFormValuesToAddDeviceDto();
   }
 
   private setOptionalAreasVisibility() {
-    this.anyModelDocuments = false;
-    this.anyDeviceDocuments = false;
-    this.anyRelatedDevices = false;
-
-    if (this.deviceToEdit.modelDocuments?.length > 0) {
-      this.anyModelDocuments = true;
-    }
-    if (this.deviceToEdit.deviceDocuments?.length > 0) {
-      this.anyDeviceDocuments = true;
-    }
-    if (this.deviceToEdit.relatedModels?.length > 0) {
-      this.anyRelatedDevices = true;
-    }
+    this.anyModelDocuments = this.deviceToEdit.modelDocuments?.length > 0;
+    this.anyDeviceDocuments = this.deviceToEdit.deviceDocuments?.length > 0;
+    this.anyRelatedDevices = this.deviceToEdit.relatedModels?.length > 0;
   }
 
   setRelateModelsNamesToEdit(relatedModelsToEdit: any[]) {
     this.relateModelsNamesToEdit = [];
+
+    if (!relatedModelsToEdit) {
+    return;
+    }
+
     relatedModelsToEdit.forEach(x => {
       this.relateModelsNamesToEdit.push({id: x.id, name: x.name});
     })
@@ -130,8 +130,8 @@ export class EditDeviceComponent implements AfterViewInit, OnInit {
   initializeMeasuredValues(measuredValues: any[]) {
     const measuredValuesArray = this.deviceForm.get('model.measuredValues') as FormArray;
     measuredValuesArray.clear();
-    if (measuredValues === null) {
-      return;
+    if (!measuredValues || measuredValues.length === 0) {
+    return;
     }
 
     measuredValues.forEach(x => {
@@ -157,6 +157,7 @@ export class EditDeviceComponent implements AfterViewInit, OnInit {
   }
 
   private hasFormChanged(newEditedAddDeviceDto: AddDeviceDto): boolean {
+    if (!this.deviceToBeEditedDto) return true;
     let devicesTheSame = this.compareDevices(this.deviceToBeEditedDto, newEditedAddDeviceDto);
     return devicesTheSame
       && this.selectedDeviceFiles.length == 0
@@ -175,16 +176,13 @@ export class EditDeviceComponent implements AfterViewInit, OnInit {
   }
 
   private arraysHaveSameValues(arr1: any[], arr2: any[]): boolean {
-    // Check if arrays have the same length
     if (arr1.length !== arr2.length) {
       return false;
     }
 
-    // Sort both arrays
     const sortedArr1 = arr1.slice().sort();
     const sortedArr2 = arr2.slice().sort();
 
-    // Compare each element
     for (let i = 0; i < sortedArr1.length; i++) {
       if (sortedArr1[i] !== sortedArr2[i]) {
         return false;
@@ -197,20 +195,16 @@ export class EditDeviceComponent implements AfterViewInit, OnInit {
   onSubmit() {
     this.submitted = true;
     if (this.deviceForm.invalid) {
+      console.log('Form is invalid:', this.deviceForm.errors);
       return;
     }
 
     let newEditedAddDeviceDto = this.mapDeviceFormValuesToAddDeviceDto();
 
     const deviceFilesFormData = new FormData();
-    const modelFilesFormData = new FormData();
 
     this.selectedDeviceFiles.forEach(file => {
       deviceFilesFormData.append('files', file);
-    });
-
-    this.selectedModelFiles.forEach(file => {
-      modelFilesFormData.append('files', file);
     });
 
     if (this.selectedRelatedModelsNames.length > 0) {
@@ -220,15 +214,15 @@ export class EditDeviceComponent implements AfterViewInit, OnInit {
       });
     }
 
-    if (this.hasFormChanged(newEditedAddDeviceDto)) {
+    if (!this.hasFormChanged(newEditedAddDeviceDto)) {
       alert('Aby dokonać edycji urządzenia, wprowadzone dane muszą się różnić.');
       return;
     }
-    newEditedAddDeviceDto.Model.CooperatedModelsIds = this.cooperatedModelsIds;
+    //newEditedAddDeviceDto.Model.CooperatedModelsIds = this.cooperatedModelsIds;
 
     this.markFormGroupTouched(this.deviceForm);
     if (this.deviceForm.valid) {
-      this.apiService.editDevice(this.deviceToEdit.deviceId, this.deviceToBeEditedDto, newEditedAddDeviceDto, this.relateModelsIdsToBeRemoved).pipe(
+      this.apiService.editDevice(this.deviceToEdit.deviceId, this.deviceToBeEditedDto!, newEditedAddDeviceDto, this.relateModelsIdsToBeRemoved).pipe(
         switchMap((x: any) => {
           const observables = [];
           if (this.selectedDeviceFiles.length > 0) {
@@ -236,16 +230,8 @@ export class EditDeviceComponent implements AfterViewInit, OnInit {
             deviceFilesFormData.append('modelId', '');
             observables.push(this.apiService.addDocuments(deviceFilesFormData).pipe(catchError(error => of(error))));
           }
-          if (this.selectedModelFiles.length > 0) {
-            modelFilesFormData.append('deviceId', '');
-            modelFilesFormData.append('modelId', x.modelId.toString());
-            observables.push(this.apiService.addDocuments(modelFilesFormData).pipe(catchError(error => of(error))));
-          }
           if (this.deviceDocumentsIdsToBeRemoved.length > 0) {
             observables.push(this.apiService.removeDocuments(this.deviceDocumentsIdsToBeRemoved).pipe(catchError(error => of(error))));
-          }
-          if (this.modelDocumentsIdsToBeRemoved.length > 0) {
-            observables.push(this.apiService.removeDocuments(this.modelDocumentsIdsToBeRemoved).pipe(catchError(error => of(error))));
           }
           if(observables.length > 0){
             return forkJoin(observables).pipe(
@@ -333,21 +319,45 @@ export class EditDeviceComponent implements AfterViewInit, OnInit {
     return obj1 === obj2;
 }
 
-  private mapDeviceFormValuesToAddDeviceDto(): AddDeviceDto {
-    let addDeviceDto = new AddDeviceDto();
-    addDeviceDto.IdentificationNumber = this.getValueFromDeviceForm('identificationNumber');
-    let productionDate = this.getValueFromDeviceForm('productionDate');
-    addDeviceDto.ProductionDate = productionDate != null ? new Date(this.getValueFromDeviceForm('productionDate')) : undefined;
-    addDeviceDto.CalibrationPeriodInYears = this.getValueFromDeviceForm('calibrationPeriodInYears');
-    let lastCalibrationDate = this.getValueFromDeviceForm('lastCalibrationDate');
-    addDeviceDto.LastCalibrationDate = lastCalibrationDate != null ? new Date(this.getValueFromDeviceForm('lastCalibrationDate')) : undefined;
-    let nextCalibrationDate = this.getValueFromDeviceForm('nextCalibrationDate');
-    addDeviceDto.NextCalibrationDate = nextCalibrationDate != null ? new Date(this.getValueFromDeviceForm('nextCalibrationDate')) : undefined;
-    addDeviceDto.IsCalibrated = this.getValueFromDeviceForm('isCalibrated');
-    addDeviceDto.IsCalibrationCloseToExpire = this.getValueFromDeviceForm('isCalibrationCloseToExpire');
-    addDeviceDto.StorageLocation = this.getValueFromDeviceForm('storageLocation');
-    addDeviceDto.Model = this.getModelFromDeviceForm();
+private mapDeviceToEditToAddDeviceDto(): AddDeviceDto {
+  const addDeviceDto = new AddDeviceDto();
+  addDeviceDto.identificationNumber = this.deviceToEdit.deviceIdentificationNumber || '';
+  addDeviceDto.productionDate = this.deviceToEdit.productionDate ? new Date(this.deviceToEdit.productionDate).toISOString() : undefined;
+  addDeviceDto.calibrationPeriodInYears = this.deviceToEdit.calibrationPeriodInYears || undefined;
+  addDeviceDto.lastCalibrationDate = this.deviceToEdit.lastCalibrationDate ? new Date(this.deviceToEdit.lastCalibrationDate).toISOString() : undefined;
+  addDeviceDto.nextCalibrationDate = this.deviceToEdit.nextCalibrationDate ? new Date(this.deviceToEdit.nextCalibrationDate).toISOString() : undefined;
+  addDeviceDto.isCalibrated = this.deviceToEdit.isCalibrated ?? undefined;
+  addDeviceDto.isCalibrationCloseToExpire = this.deviceToEdit.isCalibrationCloseToExpire ?? undefined;
+  addDeviceDto.storageLocation = this.deviceToEdit.storageLocation || undefined;
+  addDeviceDto.model = this.deviceToEdit.modelName || '';
+  addDeviceDto.serialNumber = this.deviceToEdit.serialNumber || '';
+  addDeviceDto.company = { name: this.deviceToEdit.producer || '' };
+  addDeviceDto.cooperatedModelsIds = this.deviceToEdit.relatedModels?.map((x: any) => x.id) || [];
 
+  console.log('Mapped oldDevice AddDeviceDto:', addDeviceDto);
+  return addDeviceDto;
+}
+
+private mapDeviceFormValuesToAddDeviceDto(): AddDeviceDto {
+    const addDeviceDto = new AddDeviceDto();
+    addDeviceDto.identificationNumber = this.getValueFromDeviceForm('identificationNumber') || '';
+    const productionDate = this.getValueFromDeviceForm('productionDate');
+    addDeviceDto.productionDate = productionDate ? new Date(productionDate).toISOString() : undefined;
+    addDeviceDto.calibrationPeriodInYears = this.getValueFromDeviceForm('calibrationPeriodInYears') ?
+      +this.getValueFromDeviceForm('calibrationPeriodInYears') : undefined;
+    const lastCalibrationDate = this.getValueFromDeviceForm('lastCalibrationDate');
+    addDeviceDto.lastCalibrationDate = lastCalibrationDate ? new Date(lastCalibrationDate).toISOString() : undefined;
+    const nextCalibrationDate = this.getValueFromDeviceForm('nextCalibrationDate');
+    addDeviceDto.nextCalibrationDate = nextCalibrationDate ? new Date(nextCalibrationDate).toISOString() : undefined;
+    addDeviceDto.isCalibrated = this.getValueFromDeviceForm('isCalibrated') ?? undefined;
+    addDeviceDto.isCalibrationCloseToExpire = this.getValueFromDeviceForm('isCalibrationCloseToExpire') ?? undefined;
+    addDeviceDto.storageLocation = this.getValueFromDeviceForm('storageLocation') || undefined;
+    addDeviceDto.model = this.deviceForm.get('model.name')?.value || '';
+    addDeviceDto.serialNumber = this.deviceForm.get('model.serialNumber')?.value || '';
+    addDeviceDto.company = { name: this.deviceForm.get('model.companyName')?.value || '' };
+    addDeviceDto.cooperatedModelsIds = this.cooperatedModelsIds;
+
+    console.log('Mapped AddDeviceDto:', addDeviceDto);
     return addDeviceDto;
   }
 
@@ -453,12 +463,34 @@ export class EditDeviceComponent implements AfterViewInit, OnInit {
         modelIdNamesWithDuplicates.push(modelIdName);
         this.modelNameIds.push(modelIdName);
         this.modelsNames.push(device.modelName);
-        this.modelsSerialNumbers.push(device.modelSerialNumber);
+        this.modelsSerialNumbers.push(device.serialNumber);
       })
       if(this.relateModelsNamesToEdit.length > 0) {
         this.modelNameIds = this.modelNameIds.filter(x => !this.relateModelsNamesToEdit.some(y => y.id == x.id));
       }
       this.modelNameIds = this.prepareReatedModelsListToDisplay(modelIdNamesWithDuplicates);
+
+      const selectedDevice = this.devices.find(
+      x => x.modelName === this.deviceToEdit.modelName && x.modelSerialNumber === this.deviceToEdit.modelSerialNumber
+    );
+
+    if (selectedDevice) {
+      this.initializeMeasuredValues(selectedDevice.measuredValues);
+      this.deviceForm.patchValue({
+        identificationNumber: this.deviceToEdit.deviceIdentificationNumber || '',
+        productionDate: this.deviceToEdit.productionDate?.split('T')[0] || '',
+        lastCalibrationDate: this.deviceToEdit.lastCalibrationDate ? this.deviceToEdit.lastCalibrationDate.split('T')[0] : '',    calibrationPeriodInYears: this.deviceToEdit.calibrationPeriodInYears || '',
+        //calibrationPeriodInYears: this.deviceToEdit.calibrationPeriodInYears || '',
+        nextCalibrationDate: this.deviceToEdit.nextCalibrationDate ? this.deviceToEdit.nextCalibrationDate.split('T')[0] : '',
+        isCalibrationCloseToExpire: this.deviceToEdit.isCalibrationCloseToExpire ?? null,
+        storageLocation: this.deviceToEdit.storageLocation || '',
+        model: {
+          name: selectedDevice.model,
+          serialNumber: selectedDevice.serialNumber,
+          companyName: selectedDevice.producer
+        }
+      });
+    }
     });
   }
 
@@ -512,9 +544,17 @@ export class EditDeviceComponent implements AfterViewInit, OnInit {
     var modelMeasuredValues = deviceSelected.measuredValues;
     this.initializeMeasuredValues(modelMeasuredValues);
 
+    //nextCalibrationDate: this.deviceToEdit.nextCalibrationDate ? this.deviceToEdit.nextCalibrationDate.split('T')[0] : '',
+    //isCalibrationCloseToExpire: this.deviceToEdit.isCalibrationCloseToExpire ?? null,
+
     this.deviceForm.patchValue({
+      identificationNumber: this.deviceToEdit.deviceIdentificationNumber || '',
+      lastCalibrationDate: this.deviceToEdit.lastCalibrationDate ? this.deviceToEdit.lastCalibrationDate.split('T')[0] : '',    calibrationPeriodInYears: this.deviceToEdit.calibrationPeriodInYears || '',
+      //calibrationPeriodInYears: this.deviceToEdit.calibrationPeriodInYears || '',
+      storageLocation: this.deviceToEdit.storageLocation || '',
       model: {
-        serialNumber: deviceSelected.modelSerialNumber,
+        name: deviceSelected.name,
+        serialNumber: deviceSelected.serialNumber,
         companyName: deviceSelected.producer
       }
     });
@@ -525,7 +565,7 @@ export class EditDeviceComponent implements AfterViewInit, OnInit {
     let deviceSelected = this.devices.find(x => x.modelSerialNumber === selectedSerialNumber);
     this.deviceForm.patchValue({
       model: {
-        name: deviceSelected.modelName,
+        name: deviceSelected.name,
         companyName: deviceSelected.producer
       }
     });
@@ -585,20 +625,22 @@ export class EditDeviceComponent implements AfterViewInit, OnInit {
   }
 
   private bindOldValues() {
-    this.deviceForm.patchValue({
-      identificationNumber: this.deviceToEdit.deviceIdentificationNumber,
-      productionDate: this.deviceToEdit.productionDate,
-      lastCalibrationDate: this.deviceToEdit.lastCalibrationDate,
-      calibrationPeriodInYears: this.deviceToEdit.calibrationPeriodInYears,
-      nextCalibrationDate: this.deviceToEdit.nextCalibrationDate,
-      storageLocation: this.deviceToEdit.storageLocation,
+    console.log('deviceToEdit przed przypisaniem:', this.deviceToEdit);
+  this.deviceForm.patchValue({
+    identificationNumber: this.deviceToEdit.deviceIdentificationNumber || '',
+    productionDate: this.deviceToEdit.productionDate?.split('T')[0] || '',
+    lastCalibrationDate: this.deviceToEdit.lastCalibrationDate ? this.deviceToEdit.lastCalibrationDate.split('T')[0] : '',    calibrationPeriodInYears: this.deviceToEdit.calibrationPeriodInYears || '',
+    //calibrationPeriodInYears: this.deviceToEdit.calibrationPeriodInYears || '',
+    nextCalibrationDate: this.deviceToEdit.nextCalibrationDate ? this.deviceToEdit.nextCalibrationDate.split('T')[0] : '',
+    isCalibrationCloseToExpire: this.deviceToEdit.isCalibrationCloseToExpire ?? null,
+    storageLocation: this.deviceToEdit.storageLocation || '',
+    model: {
+      name: this.deviceToEdit.model || '',
+      serialNumber: this.deviceToEdit.serialNumber || '',
+      companyName: this.deviceToEdit.producer || ''
+    }
+  });
 
-      model: {
-        name: this.deviceToEdit.modelName,
-        serialNumber: this.deviceToEdit.modelSerialNumber,
-        companyName: this.deviceToEdit.producer,
-      }
-    })
-  }
-
+  console.log('Form after bind:', this.deviceForm.value);
+}
 }

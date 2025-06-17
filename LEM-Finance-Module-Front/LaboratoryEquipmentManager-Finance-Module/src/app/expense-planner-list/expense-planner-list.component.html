@@ -21,6 +21,7 @@
       <tr>
         <th>Planowana data</th>
         <th>Opis</th>
+        <th>Status wykonania</th>
         <th>Cena netto PLN</th>
         <th>Cena brutto PLN</th>
         <th>Netto</th>
@@ -37,6 +38,7 @@
       <tr *ngFor="let expense of expenses">
         <td>{{ expense.plannedDate | date:'yyyy-MM-dd' }}</td>
         <td>{{ expense.description }}</td>
+        <td>{{ expense.status }}</td>
         <td>{{ expense.netPricePLN | currency:'PLN':'symbol':'1.2-2' }}</td>
         <td>{{ expense.grossPricePLN | currency:'PLN':'symbol':'1.2-2' }}</td>
         <td>{{ expense.currency !== 'PLN' ? (expense.netPrice | number:'1.2-2') + ' ' + expense.currency : '' }}</td>
@@ -84,14 +86,14 @@
       <tbody>
         <tr *ngFor="let status of summary | keyvalue">
           <td>{{ status.key }}</td>
-          <td>{{ status.value.net | currency:'PLN':'symbol':'1.2-2' }}</td>
-          <td>{{ status.value.gross | currency:'PLN':'symbol':'1.2-2' }}</td>
+          <td>{{ status.value.net | currency:'PLN ':'symbol':'1.2-2' }}</td>
+          <td>{{ status.value.gross | currency:'PLN ':'symbol':'1.2-2' }}</td>
         </tr>
         <tr class="spacer-row"></tr>
         <tr class="total-row">
           <td><strong>Suma:</strong></td>
-          <td><strong>{{ totalNet | currency:'PLN':'symbol':'1.2-2' }}</strong></td>
-          <td><strong>{{ totalGross | currency:'PLN':'symbol':'1.2-2' }}</strong></td>
+          <td><strong>{{ totalNet | currency:'PLN ':'symbol':'1.2-2' }}</strong></td>
+          <td><strong>{{ totalGross | currency:'PLN ':'symbol':'1.2-2' }}</strong></td>
         </tr>
       </tbody>
     </table>

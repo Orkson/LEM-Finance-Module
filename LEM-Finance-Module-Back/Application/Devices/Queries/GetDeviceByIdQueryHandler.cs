@@ -34,21 +34,24 @@ namespace Application.Devices.Queries
             var deviceDetailsDto = new DeviceDetailsDto
             {
                 DeviceId = device.Id,
-                ModelName = device.Model.Name,
-                TotalDevicesOfModelCount = _deviceRepository.TotalDevicesByModelCount(device.Model.Name),
+                //ModelName = device.Model?.Name, // odkomentuj, jeśli potrzebujesz
+                //TotalDevicesOfModelCount = _deviceRepository.TotalDevicesByModelCount(device.Model?.Name),
                 DeviceIdentificationNumber = device.IdentificationNumber,
-                MeasuredValues = GetMeasuredValues(device.ModelId),
-                ModelSerialNumber = device.Model.SerialNumber,
-                ModelId = device.ModelId,
+                MeasuredValues = GetMeasuredValues(device.Id),
+                SerialNumber = device.SerialNumber,
+                Model = device.Model,
                 StorageLocation = device.StorageLocation,
                 ProductionDate = device.ProductionDate,
                 LastCalibrationDate = device.LastCalibrationDate,
-                Producer = device.Model.Company?.Name,
+                Producer = device.Company != null ? device.Company.Name : null,
                 CalibrationPeriodInYears = device.CalibrationPeriodInYears,
-                IsCalibrated = CheckIfDeviceIsCalibrated(device?.LastCalibrationDate, device?.CalibrationPeriodInYears),
+                IsCalibrated = CheckIfDeviceIsCalibrated(device.LastCalibrationDate, device.CalibrationPeriodInYears),
                 DeviceDocuments = GetDocumentsForDevice(device.Id),
-                ModelDocuments = GetDocumentsForModel(device.ModelId),
-                RelatedModels = await GetRelatedModelsAsync(device.ModelId, cancellationToken),
+                EstimatedCalibrationDate = device.LastCalibrationDate.HasValue
+                    ? device.LastCalibrationDate.Value.AddYears(device.CalibrationPeriodInYears ?? 0)
+                    : (DateTime?)null,
+                //ModelDocuments = GetDocumentsForModel(device.ModelId),
+                //RelatedModels = await GetRelatedModelsAsync(device.ModelId, cancellationToken),
             };
 
             return deviceDetailsDto;
@@ -75,9 +78,9 @@ namespace Application.Devices.Queries
             return GetDocumentsDto(deviceDocuments);
 
         }
-        private ICollection<DocumentDto>? GetDocumentsForModel(int modelId)
+        private ICollection<DocumentDto>? GetDocumentsForModel(int deviceId)
         {
-            var modelDocuments = _dbContext.Documents.Where(x => x.ModelId == modelId).ToList();
+            var modelDocuments = _dbContext.Documents.Where(x => x.DeviceId == deviceId).ToList();
             if (!modelDocuments.Any())
             {
                 return null;
@@ -138,10 +141,10 @@ namespace Application.Devices.Queries
             return relatedModels;
         }
 
-        private List<MeasuredValueDto> GetMeasuredValues(int modelId)
+        private List<MeasuredValueDto> GetMeasuredValues(int deviceId)
         {
             var measuredValues = _dbContext.MeasuredValues
-                .Where(x => x.ModelId == modelId)
+                .Where(x => x.Id == deviceId)
                 .Select(x => new MeasuredValueDto
                 {
                     Id = x.Id,

@@ -9,9 +9,7 @@
         public DateTime? DateAdded { get; set; }
 
         public int? DeviceId { get; set; }
-        public int? ModelId { get; set; }
 
         public virtual Device Device { get; set; }
-        public virtual Model Model { get; set; }
     }
 }

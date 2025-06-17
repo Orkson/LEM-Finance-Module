@@ -40,22 +40,22 @@ namespace Application.Devices.Commands
                 device.NextCalibrationDate = SetNextCalibrationDate(request.AddDeviceDto);
             }
 
-            var model = request.AddDeviceDto.Model;
-            var createdDeviceResponse = new CreatedDeviceResponseDto(identificationNumber, null, null);
+            //var model = request.AddDeviceDto.Model;
+            var createdDeviceResponse = new CreatedDeviceResponseDto(identificationNumber, null);
 
             using (var transaction = await _unitOfWork.BeginTransactionAsync(cancellationToken))
             {
                 try
                 {
-                    var modelId = await _sender.Send(
-                    new CreateModelCommand(model),
-                    cancellationToken);
+                    //var modelId = await _sender.Send(
+                    //new CreateModelCommand(model),
+                    //cancellationToken);
 
-                    device.ModelId = modelId;
+                    //device.ModelId = modelId;
 
                     var deviceId = await _deviceRepository.AddDevice(device, cancellationToken);
 
-                    createdDeviceResponse.ModelId = modelId;
+                    //createdDeviceResponse.ModelId = modelId;
                     createdDeviceResponse.DeviceId = deviceId;
 
                     await _unitOfWork.CommitAsync(cancellationToken);

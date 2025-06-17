@@ -184,63 +184,50 @@ export class AddDeviceComponent implements OnInit, AfterViewInit {
   onSubmit() {
     this.submitted = true;
     if (this.deviceForm.invalid) {
+      console.log('Form is invalid:', this.deviceForm.errors);
+      this.markFormGroupTouched(this.deviceForm);
       return;
     }
 
     let addDeviceDto = this.mapDeviceFormValuesToAddDeviceDto();
 
-    const deviceFilesFormData = new FormData();
-    const modelFilesFormData = new FormData();
+    const formData = new FormData();
+
+    formData.append('addDeviceDto', JSON.stringify(addDeviceDto));
 
     this.selectedDeviceFiles.forEach(file => {
-      deviceFilesFormData.append('files', file);
-    });
-
-    this.selectedModelFiles.forEach(file => {
-      modelFilesFormData.append('files', file);
+      formData.append('deviceDocuments', file);
     });
 
     if (this.selectedRelatedModelsNames.length > 0) {
+      this.cooperatedModelsIds = [];
       this.selectedRelatedModelsNames.forEach(x => {
         this.cooperatedModelsIds.push(x.id);
       });
-      addDeviceDto.Model.CooperatedModelsIds = this.cooperatedModelsIds;
+      addDeviceDto.cooperatedModelsIds = this.cooperatedModelsIds;
+
+      formData.set('addDeviceDto', JSON.stringify(addDeviceDto));
     }
 
     this.markFormGroupTouched(this.deviceForm);
 
     if (this.deviceForm.valid) {
-      this.apiService.createDevice(addDeviceDto).pipe(
-        switchMap((x: any) => {
-          const observables = [];
-          if (this.selectedDeviceFiles.length > 0) {
-            deviceFilesFormData.append('deviceId', x.deviceId.toString());
-            deviceFilesFormData.append('modelId', '');
-            observables.push(this.apiService.addDocuments(deviceFilesFormData).pipe(catchError(error => of(error))));
-          }
-          if (this.selectedModelFiles.length > 0) {
-            modelFilesFormData.append('deviceId', '');
-            modelFilesFormData.append('modelId', x.modelId.toString());
-            observables.push(this.apiService.addDocuments(modelFilesFormData).pipe(catchError(error => of(error))));
-          }
-          if(observables.length > 0){
-            return forkJoin(observables).pipe(
-              map(() => x)
-            );
-          } else {
-            return of(x);
-          }
-        })
-      ).subscribe((x) => {
+    this.apiService.createDevice(formData).subscribe({
+      next: (x: any) => {
         alert(`Urządzenie o id: ${x.identificationNumber} zostało dodane`);
         this.deviceForm.reset();
         window.scroll({
           top: 0,
           behavior: 'smooth'
         });
-      });
-    }
+      },
+      error: (err) => {
+        console.error('Error adding device:', err);
+        alert('Wystąpił błąd podczas dodawania urządzenia.');
+      }
+    });
   }
+}
 
   markFormGroupTouched(control: AbstractControl) {
     if (control instanceof FormGroup) {
@@ -298,19 +285,23 @@ export class AddDeviceComponent implements OnInit, AfterViewInit {
 
   private mapDeviceFormValuesToAddDeviceDto(): AddDeviceDto {
     let addDeviceDto = new AddDeviceDto();
-    addDeviceDto.IdentificationNumber = this.getValueFromDeviceForm('identificationNumber');
+    addDeviceDto.identificationNumber = this.getValueFromDeviceForm('identificationNumber');
     let productionDate = this.getValueFromDeviceForm('productionDate');
-    addDeviceDto.ProductionDate = productionDate != null ? new Date(this.getValueFromDeviceForm('productionDate')) : undefined;
-    addDeviceDto.CalibrationPeriodInYears = this.getValueFromDeviceForm('calibrationPeriodInYears');
+    addDeviceDto.productionDate = productionDate ? new Date(productionDate).toISOString() : undefined;
+    addDeviceDto.calibrationPeriodInYears = this.getValueFromDeviceForm('calibrationPeriodInYears');
     let lastCalibrationDate = this.getValueFromDeviceForm('lastCalibrationDate');
-    addDeviceDto.LastCalibrationDate = lastCalibrationDate != null ? new Date(this.getValueFromDeviceForm('lastCalibrationDate')) : undefined;
+    addDeviceDto.lastCalibrationDate = lastCalibrationDate ? new Date(lastCalibrationDate).toISOString() : undefined;
     let nextCalibrationDate = this.getValueFromDeviceForm('nextCalibrationDate');
-    addDeviceDto.NextCalibrationDate = nextCalibrationDate != null ? new Date(this.getValueFromDeviceForm('nextCalibrationDate')) : undefined;
-    addDeviceDto.IsCalibrated = this.getValueFromDeviceForm('isCalibrated');
-    addDeviceDto.IsCalibrationCloseToExpire = this.getValueFromDeviceForm('isCalibrationCloseToExpire');
-    addDeviceDto.StorageLocation = this.getValueFromDeviceForm('storageLocation');
-    addDeviceDto.Model = this.getModelFromDeviceForm();
+    addDeviceDto.nextCalibrationDate = nextCalibrationDate ? new Date(nextCalibrationDate).toISOString() : undefined;
+    addDeviceDto.isCalibrated = this.getValueFromDeviceForm('isCalibrated')?? undefined;
+    addDeviceDto.isCalibrationCloseToExpire = this.getValueFromDeviceForm('isCalibrationCloseToExpire');
+    addDeviceDto.storageLocation = this.getValueFromDeviceForm('storageLocation');
+    addDeviceDto.model = this.deviceForm.get('model.name')?.value;
+    addDeviceDto.serialNumber = this.deviceForm.get('model.serialNumber')?.value;
+    addDeviceDto.company = { name: this.deviceForm.get('model.companyName')?.value || '' };
+    addDeviceDto.cooperatedModelsIds = this.cooperatedModelsIds;
 
+    console.log('Mapped AddDeviceDto:', addDeviceDto);
     return addDeviceDto;
   }
 

@@ -45,19 +45,16 @@ export class ApiServiceService {
     return this.http.get(this.apiUrl + 'models', {params});
   }
 
-  createDevice(addDeviceDto: any): Observable<any> {
-    return this.http.post(this.apiUrl + 'devices', addDeviceDto).pipe((response: any) => response);
+  //createDevice(addDeviceDto: any): Observable<any> {
+  //  return this.http.post(this.apiUrl + 'devices', addDeviceDto).pipe((response: any) => response);
+  //}
+  createDevice(formData: FormData): Observable<any> {
+  return this.http.post<any>(this.apiUrl + 'devices', formData);
   }
 
   editDevice(deviceId: number, oldDeviceDto: AddDeviceDto, newDeviceDto: AddDeviceDto, modelCooperationsToBeRemoved: number[] | null): Observable<any> {
     const url = `${this.apiUrl+'devices'}/${deviceId}`;
-
-    const body = {
-      oldDevice: oldDeviceDto,
-      newDevice: newDeviceDto,
-      modelCooperationsToBeRemoved: modelCooperationsToBeRemoved,
-    };
-
+    const body = {oldDevice: oldDeviceDto, newDevice: newDeviceDto, modelCooperationsToBeRemoved: modelCooperationsToBeRemoved,};
     return this.http.put(url, body).pipe((response: any) => response);
   }
 
@@ -126,15 +123,18 @@ export class ApiServiceService {
 }
 
 export class AddDeviceDto {
-   IdentificationNumber: string;
-   ProductionDate?: Date;
-   CalibrationPeriodInYears?: number;
-   LastCalibrationDate?: Date;
-   NextCalibrationDate?: Date;
-   IsCalibrated: boolean;
-   IsCalibrationCloseToExpire?: boolean;
-   StorageLocation?: string;
-   Model: ModelDto;
+   identificationNumber: string;
+   productionDate?: string;
+   calibrationPeriodInYears?: number;
+   lastCalibrationDate?: string;
+   nextCalibrationDate?: string;
+   isCalibrated?: boolean;
+   isCalibrationCloseToExpire?: boolean;
+   storageLocation?: string;
+   model: string;
+   serialNumber: string;
+   company: { name: string } = { name: '' };
+   cooperatedModelsIds?: number[];
 }
 
 export class DeviceDto {

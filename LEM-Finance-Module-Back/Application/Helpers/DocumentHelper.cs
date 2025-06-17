@@ -24,16 +24,16 @@ namespace Application.Helpers
             return GetDocumentsDto(deviceDocuments);
 
         }
-        public List<DocumentDto>? GetDocumentsForModel(int modelId)
-        {
-            var modelDocuments = _dbContext.Documents.Where(x => x.ModelId == modelId).ToList();
-            if (!modelDocuments.Any())
-            {
-                return null;
-            }
-
-            return GetDocumentsDto(modelDocuments);
-        }
+        //public List<DocumentDto>? GetDocumentsForModel(int modelId)
+        //{
+        //    var modelDocuments = _dbContext.Documents.Where(x => x.ModelId == modelId).ToList();
+        //    if (!modelDocuments.Any())
+        //    {
+        //        return null;
+        //    }
+        //
+        //    return GetDocumentsDto(modelDocuments);
+        //}
 
         private List<DocumentDto> GetDocumentsDto(List<Document> documents)
         {
