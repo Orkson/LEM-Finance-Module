@@ -27,6 +27,7 @@ import { AuthService } from './auth-service.service';
 import { UsersListComponent } from './user/users-list/users-list.component';
 import { ExpensePlannerListComponent } from './expense-planner-list/expense-planner-list.component';
 import { ExpensePlannerFormComponent } from './expense-planner-form/expense-planner-form.component';
+import { RegisterComponent } from './register/register.component';
 
 @NgModule({
   declarations: [
@@ -41,7 +42,8 @@ import { ExpensePlannerFormComponent } from './expense-planner-form/expense-plan
     EditDeviceComponent,
     LoginComponent,
     ExpensePlannerListComponent,
-    ExpensePlannerFormComponent
+    ExpensePlannerFormComponent,
+    RegisterComponent,
   ],
   imports: [
     BrowserModule,
@@ -58,7 +60,7 @@ import { ExpensePlannerFormComponent } from './expense-planner-form/expense-plan
     NgbTypeaheadModule,
     MultiSelectModule,
     MatCheckboxModule,
-    UsersListComponent,
+    UsersListComponent
     ],
   providers: [
     { provide: MatPaginatorIntl, useClass: PolishPaginatorIntl }

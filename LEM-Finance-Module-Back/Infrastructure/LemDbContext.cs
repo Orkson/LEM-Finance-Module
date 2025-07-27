@@ -39,29 +39,6 @@ namespace Infrastructure
                 .OnDelete(DeleteBehavior.Cascade);
             });
 
-            //modelBuilder.Entity<Model>(m =>
-            //{
-            //    m.HasOne(m => m.Company)
-            //    .WithMany(c => c.Models)
-            //    .HasForeignKey(m => m.CompanyId);
-            //
-            //    m.HasIndex(x => x.SerialNumber)
-            //    .IsUnique();
-            //
-            //    m.HasIndex(x => x.Name)
-            //    .IsUnique();
-            //
-            //    m.HasMany(x => x.MeasuredValues)
-            //    .WithOne(x => x.Model)
-            //    .HasForeignKey(x => x.ModelId)
-            //    .OnDelete(DeleteBehavior.Cascade);
-            //
-            //    m.HasMany(x => x.Documents)
-            //    .WithOne(x => x.Model)
-            //    .HasForeignKey(x => x.ModelId)
-            //    .OnDelete(DeleteBehavior.Restrict);
-            //});
-
             modelBuilder.Entity<Company>(x => x.HasIndex(x => x.Name).IsUnique());
 
             modelBuilder.Entity<PhysicalMagnitude>(pm =>

@@ -9,6 +9,11 @@
   >
     Przejdź do listy urządzeń
   </button>
+
+  <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
+  <div *ngIf="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
+
+
   <div class="parameters mb-5">
     <form [formGroup]="deviceForm" class="mb-3">
       <h3>Parametry</h3>

@@ -23,7 +23,7 @@ public class AuthController : ControllerBase
         _configuration = configuration;
     }
 
-    [Authorize]
+    [AllowAnonymous]
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterUserModel model)
     {

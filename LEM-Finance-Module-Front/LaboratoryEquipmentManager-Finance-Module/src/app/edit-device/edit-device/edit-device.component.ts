@@ -48,6 +48,9 @@ export class EditDeviceComponent implements AfterViewInit, OnInit {
   selectedModelFilesIdsToBeRemoved: number[] = [];
   selectedDeviceFilesIdsToBeRemoved: number[] = [];
 
+  successMessage: string = '';
+  errorMessage: string = '';
+
   constructor(private router: Router, private fb: FormBuilder, private apiService: ApiServiceService) {
     this.deviceForm = this.fb.group({
       identificationNumber: ['', Validators.required],
@@ -67,6 +70,7 @@ export class EditDeviceComponent implements AfterViewInit, OnInit {
         cooperatedModelsIds: [''],
 
         measuredValues: this.fb.array([])
+        
       })
     });
   }
@@ -193,6 +197,13 @@ export class EditDeviceComponent implements AfterViewInit, OnInit {
   }
 
   onSubmit() {
+    type ResultItem = {
+      type: 'addDocuments' | 'removeDocuments';
+      success: boolean;
+      data?: any;
+      error?: any;
+    };
+
     this.submitted = true;
     if (this.deviceForm.invalid) {
       console.log('Form is invalid:', this.deviceForm.errors);
@@ -228,42 +239,75 @@ export class EditDeviceComponent implements AfterViewInit, OnInit {
           if (this.selectedDeviceFiles.length > 0) {
             deviceFilesFormData.append('deviceId', x.deviceId.toString());
             deviceFilesFormData.append('modelId', '');
-            observables.push(this.apiService.addDocuments(deviceFilesFormData).pipe(catchError(error => of(error))));
+            observables.push(
+              this.apiService.addDocuments(deviceFilesFormData).pipe(
+              map(res => ({ type: 'addDocuments', success: true, data: res })),
+              catchError(err => of({ type: 'addDocuments', success: false, error: err }))
+              )
+            );
           }
           if (this.deviceDocumentsIdsToBeRemoved.length > 0) {
-            observables.push(this.apiService.removeDocuments(this.deviceDocumentsIdsToBeRemoved).pipe(catchError(error => of(error))));
+            observables.push(
+              this.apiService.removeDocuments(this.deviceDocumentsIdsToBeRemoved).pipe(
+              map(res => ({ type: 'removeDocuments', success: true, data: res })),
+              catchError(err => of({ type: 'removeDocuments', success: false, error: err }))
+              )
+            );
           }
           if(observables.length > 0){
             return forkJoin(observables).pipe(
-              map(() => x)
+              map(results => ({ x, results }))
             );
           } else {
             return of(x);
           }
 
         })
-      ).subscribe((x) => {
-        this.relateModelsNamesToEdit = this.relateModelsNamesToEdit.filter(x => !this.relateModelsIdsToBeRemoved.some(y => y == x.id));
-        if(this.selectedRelatedModelsNames.length > 0) {
-          this.selectedRelatedModelsNames.forEach(x => {
-            this.relateModelsNamesToEdit.push({id: x.id, name: x.name});
-          });
-        }
-        this.selectedRelatedModelsNames = [];
+      ).subscribe(({ x, results }: { x: any, results: ResultItem[] }) => {
+  this.relateModelsNamesToEdit = this.relateModelsNamesToEdit.filter(x => !this.relateModelsIdsToBeRemoved.some(y => y == x.id));
+  if (this.selectedRelatedModelsNames.length > 0) {
+    this.selectedRelatedModelsNames.forEach(x => {
+      this.relateModelsNamesToEdit.push({ id: x.id, name: x.name });
+    });
+  }
+  this.successMessage = '';
+  this.errorMessage = '';
+  let anyError = false;
 
-        if(this.relateModelsNamesToEdit.length > 0) {
-          this.anyRelatedDevices = true;
-        }
+  this.selectedRelatedModelsNames = [];
+  this.anyRelatedDevices = this.relateModelsNamesToEdit.length > 0;
 
-        alert(`Dane urządzenie o id: ${x.identificationNumber} zostały zmienione`);
-        window.scroll({
-          top: 0,
-          behavior: 'smooth'
+  const addResult = results.find(r => r.type === 'addDocuments');
+  const removeResult = results.find(r => r.type === 'removeDocuments');
+
+  if (addResult && !addResult.success) 
+  {
+    this.errorMessage = addResult.error?.error || 'Błąd podczas dodawania plików.';
+    anyError = true;
+  } 
+  else if (addResult && addResult.success) 
+  {
+    this.successMessage = 'Pliki zostały pomyślnie dodane.';
+  }
+
+  if (removeResult && !removeResult.success) {
+    this.errorMessage = removeResult.error?.error || 'Błąd podczas usuwania plików.';
+    anyError = true;
+  }
+
+  if (anyError) {
+    window.scroll({ top: 0, behavior: 'smooth' });
+    return;
+  }
+
+  const successText = addResult?.success
+    ? 'Urządzenie zostało zaktualizowane. Pliki dodane pomyślnie.'
+    : 'Urządzenie zostało zaktualizowane.';
+
+  this.router.navigate(['/devices-list'], {
+    state: { message: successText }
         });
-      }, (error) => {
-        console.error("Wystąpił błąd przy edycji");
-      }
-    );
+      });
     }
   }
 

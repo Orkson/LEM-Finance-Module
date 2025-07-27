@@ -17,19 +17,36 @@ export class AppComponent implements OnInit {
   ){}
 
   ngOnInit(): void {
-    this.authService.isAuthenticated().subscribe(isAuthenticated => {
-      this.isLoggedIn = isAuthenticated;
-      if (isAuthenticated) {
-        this.router.navigate(['/devices-list']);
-      } else {
-        this.router.navigate(['/login']);
-      }
-    });
+  let initialRedirectDone = false;
 
-    window.addEventListener('beforeunload', () => {
-      this.authService.logout();
-    });
-  }
+  this.router.events.subscribe(event => {
+    if (event instanceof NavigationStart) {
+      const targetUrl = event.url;
+
+      this.authService.isAuthenticated().subscribe(isAuthenticated => {
+        this.isLoggedIn = isAuthenticated;
+
+        if (initialRedirectDone) return;
+
+        if (isAuthenticated) {
+          if (targetUrl === '/login' || targetUrl === '/register') {
+            this.router.navigate(['/devices-list']);
+          }
+        } else {
+          if (targetUrl !== '/login' && targetUrl !== '/register') {
+            this.router.navigate(['/login']);
+          }
+        }
+
+        initialRedirectDone = true;
+      });
+    }
+  });
+
+  window.addEventListener('beforeunload', () => {
+    this.authService.logout();
+  });
+}
   title = 'LaboratoryEquipmentManager';
 
   navigateToProfile(){

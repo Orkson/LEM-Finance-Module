@@ -8,6 +8,7 @@ import { LoginComponent } from './login/login.component';
 import { AuthGuard } from './auth.guard';
 import { ExpensePlannerFormComponent } from './expense-planner-form/expense-planner-form.component';
 import { ExpensePlannerListComponent } from './expense-planner-list/expense-planner-list.component';
+import { RegisterComponent } from './register/register.component';
 
 const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -16,6 +17,7 @@ const routes: Routes = [
   { path: 'edit-device', component: EditDeviceComponent, canActivate: [AuthGuard]},
   { path: 'user', component: UserComponent, canActivate: [AuthGuard] },
   { path: 'login', component: LoginComponent },
+  { path: 'register', component: RegisterComponent },
   { path: 'expenses-planner', component: ExpensePlannerListComponent, canActivate: [AuthGuard] },
   { path: 'expenses-planner-form', component: ExpensePlannerFormComponent, canActivate: [AuthGuard] },
   { path: 'expenses-planner-form/:id', component: ExpensePlannerFormComponent, canActivate: [AuthGuard] },

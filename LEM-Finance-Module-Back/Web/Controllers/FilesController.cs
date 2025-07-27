@@ -1,6 +1,7 @@
 ﻿using Application.Documents;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 
 namespace Web.Controllers
 {
@@ -19,10 +20,27 @@ namespace Web.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> AddFiles([FromForm]List<IFormFile>files, int? modelId, int? deviceId)
         {
-            var addDocumentsCommand = new AddDocumentsCommand(files, modelId, deviceId);
+            try
+            {
+                var addDocumentsCommand = new AddDocumentsCommand(files, modelId, deviceId);
+                var documentNames = await _mediator.Send(addDocumentsCommand);
 
-            var documentNames = await _mediator.Send(addDocumentsCommand);
-            return Ok(documentNames);
+                if (documentNames == null || !documentNames.Any())
+                {
+                    return BadRequest("Nie udało się dodać żadnych dokumentów.");
+                }
+
+                return Ok(documentNames);
+            }
+            catch (ValidationException ex)
+            {
+                return BadRequest($"Błąd walidacji: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Błąd serwera: {ex.Message}");
+            }
+
         }
 
         [HttpGet]

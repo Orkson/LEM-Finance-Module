@@ -28,7 +28,7 @@ export class DevicesListComponent implements OnInit, AfterViewInit {
   searchPhrase = new SearchPhraseDto;
   order = "asc";
   sortColumn = '';
-
+  successMessage: string = '';
   deviceQuery = new PagedAndSortedQueryOfDevicesList();
   totalDevicesCount: number = 0;
 
@@ -38,6 +38,11 @@ export class DevicesListComponent implements OnInit, AfterViewInit {
   }
   ngAfterViewInit(): void {
     this.refreshDevicesList();
+    
+    const state = history.state;
+    if (state && state.message) {
+    this.successMessage = state.message;
+    }
   }
 
   refreshDevicesList(): void {
