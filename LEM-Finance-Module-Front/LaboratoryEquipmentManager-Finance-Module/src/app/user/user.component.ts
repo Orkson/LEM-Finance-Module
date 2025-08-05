@@ -79,7 +79,6 @@ export class UserComponent implements OnInit {
 
   register(): void {
     this.registerPasswordMismatch = this.registerPassword !== this.confirmRegisterPassword;
-
     if (this.registerPasswordMismatch) {
       return;
     }
@@ -105,29 +104,44 @@ export class UserComponent implements OnInit {
           this.closeRegisterModal();
         },
         error: (err: any) => {
-          console.error('Error registering user', err);
+  if (err.status === 400 && Array.isArray(err.error)) {
+    for (const e of err.error) {
+      const desc = e.description?.toLowerCase();
+      if (desc.includes('username')) {
+        this.usernameError = e.description;
+      } else if (desc.includes('email')) {
+        this.emailError = e.description;
+            } else if (desc.includes('password')) {
+              this.registerPasswordError = e.description;
+            } else {
+              console.warn('Nieznany błąd:', e);
+            }
+          }
+        } else {
+          console.error('Inny błąd rejestracji:', err);
         }
+      }
       });
   }
 
   validatePassword(password: string): boolean {
     if (password.length < 6) {
-      this.passwordError = 'Hasło musi mieć co najmniej 6 znaków.';
+      this.registerPasswordError  = 'Hasło musi mieć co najmniej 6 znaków.';
       return false;
     }
     if (!/[A-Z]/.test(password)) {
-      this.passwordError = 'Hasło musi zawierać co najmniej jedną dużą literę.';
+      this.registerPasswordError  = 'Hasło musi zawierać co najmniej jedną dużą literę.';
       return false;
     }
     if (!/[0-9]/.test(password)) {
-      this.passwordError = 'Hasło musi zawierać co najmniej jedną cyfrę.';
+      this.registerPasswordError  = 'Hasło musi zawierać co najmniej jedną cyfrę.';
       return false;
     }
     if (!/[^a-zA-Z0-9]/.test(password)) {
-      this.passwordError = 'Hasło musi zawierać co najmniej jeden znak specjalny.';
+      this.registerPasswordError  = 'Hasło musi zawierać co najmniej jeden znak specjalny.';
       return false;
     }
-    this.passwordError = null;
+    this.registerPasswordError  = null;
     return true;
   }
 

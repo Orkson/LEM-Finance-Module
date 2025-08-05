@@ -62,7 +62,7 @@ export class AuthService {
   }
 
   register(email: string, username: string, password: string, isAdmin: boolean): Observable<any> {
-    //const headers = this.createAuthorizationHeader();
+    const headers = this.createAuthorizationHeader();
     const payload = { email, username, password, isAdmin };
     return this.http.post(`${this.apiUrl}/register`, payload);
   }
