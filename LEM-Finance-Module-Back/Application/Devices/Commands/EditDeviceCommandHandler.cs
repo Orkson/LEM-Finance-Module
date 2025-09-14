@@ -64,10 +64,64 @@ namespace Application.Devices.Commands
                 device.StorageLocation = newValues.StorageLocation;
             }
 
+            var requested = (newValues.RelatedDeviceIds ?? Enumerable.Empty<int>())
+                .Distinct()
+                .Where(id => id != request.deviceId)
+                .ToHashSet();
+
+            var current = (await _deviceRepository
+                .GetDeviceRelationsAsync(request.deviceId, cancellationToken))
+                .ToHashSet();
+
+            var toAdd = requested.Except(current.Select(a => a.DeviceId)).ToList();
+            var toRemove = current.Select(a => a.DeviceId).Except(requested).ToList();
+
+            //if (device?.RelatedDevices != newValues.RelatedDeviceIds)
+            //{
+            //    var relatedDevices = await _deviceRepository.GetDevicesByIdsAsync(request.newDeviceDto.RelatedDeviceIds, cancellationToken);
+            //
+            //    device.RelatedDevices = relatedDevices.Select(s => s.Id).ToList();
+            //}
+
             using var transaction = await _unitOfWork.BeginTransactionAsync(cancellationToken);
 
             try
             {
+                if (toAdd.Count > 0)
+                {
+                    var existingRelated = await _deviceRepository.GetDevicesByIdsAsync(toAdd, cancellationToken);
+                    var existingIds = existingRelated.Select(d => d.Id).ToHashSet();
+
+                    var links = new List<DeviceRelations>();
+                    foreach (var rid in existingIds)
+                    {
+                        links.Add(new DeviceRelations { DeviceId = request.deviceId, RelatedDeviceId = rid });
+                        links.Add(new DeviceRelations { DeviceId = rid, RelatedDeviceId = request.deviceId });
+                    }
+                    if (links.Count > 0)
+                        await _deviceRepository.AddDeviceRelationsAsync(links, cancellationToken);
+                }
+
+                if (toRemove.Count > 0)
+                {
+                    await _deviceRepository.RemoveDeviceRelationsAsync(
+                        toRemove.Select(rid => new DeviceRelations { DeviceId = request.deviceId, RelatedDeviceId = rid }),
+                        cancellationToken);
+
+                    // drugi kierunek B -> A (jeśli utrzymujesz symetrię)
+                    await _deviceRepository.RemoveDeviceRelationsAsync(
+                        toRemove.Select(rid => new DeviceRelations { DeviceId = rid, RelatedDeviceId = request.deviceId }),
+                        cancellationToken);
+                }
+
+                // 5) Zapisz zmiany samego urządzenia
+                await _deviceRepository.UpdateDeviceAsync(request.deviceId, device, cancellationToken);
+
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
+                await _unitOfWork.CommitAsync(cancellationToken);
+
+                return new EditedDeviceResponseDto(device.IdentificationNumber, device.Id);
+
                 var newMappedDevice = _mapper.Map<Device>(device);
 
                 if (device.NextCalibrationDate == null && device.CalibrationPeriodInYears != null && device.LastCalibrationDate != null)

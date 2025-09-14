@@ -9,7 +9,7 @@ import { AddDeviceDto, ApiServiceService, MeasuredRangesDto, MeasuredValueDto, M
 export enum TableName {
   editedDeviceDocuments = 'editedDeviceDocuments',
   editedModelDocuments = 'editedModelDocuments',
-  relatedModels = 'relatedModels'
+  relatedDevices = 'relatedDevices'
 }
 @Component({
   selector: 'app-edit-device',
@@ -47,6 +47,12 @@ export class EditDeviceComponent implements AfterViewInit, OnInit {
   cooperatedModelsIds: number[] = [];
   selectedModelFilesIdsToBeRemoved: number[] = [];
   selectedDeviceFilesIdsToBeRemoved: number[] = [];
+  relatedDevicesToEdit: { id: number; name: string }[] = [];
+  relatedDeviceIds: number[] = [];
+  oldRelatedDeviceIds: number[] = [];
+  relatedDeviceIdsToBeRemoved: number[] = [];
+  deviceOptions: { id: number; name: string }[] = [];
+  selectedRelatedDeviceIds: number[] = [];
 
   successMessage: string = '';
   errorMessage: string = '';
@@ -77,27 +83,85 @@ export class EditDeviceComponent implements AfterViewInit, OnInit {
 
   ngOnInit(): void {
     this.deviceToEdit = history.state.data;
-    console.log('Pełny obiekt deviceToEdit:', JSON.stringify(this.deviceToEdit, null, 2));
     if (!this.deviceToEdit) {
       alert('Brak danych urządzenia do edycji.');
       this.navigateToDevicesList();
       return;
     }
+
+    this.apiService.getDeviceById(this.deviceToEdit.deviceId, true).subscribe((full: any) => {
+    this.deviceToEdit = full;
+    
+    const relations = full?.deviceRelations ?? full?.deviceRelations ?? [];
+
+    this.relatedDeviceIds = Array.isArray(relations)
+    ? relations.map((r: any) => Number(r.relatedDeviceId)).filter((id: any) => !isNaN(id))
+    : [];
+
+    this.relatedDevicesToEdit = Array.isArray(relations)
+      ? relations.map((r: any) => ({
+        id: Number(r.relatedDeviceId),
+        name: this.buildRelatedDeviceDisplayName(r.relatedDevice)
+        }))
+      : [];
+
+    this.oldRelatedDeviceIds = [...this.relatedDeviceIds];
+
     this.setOptionalAreasVisibility();
     this.setRelateModelsNamesToEdit(this.deviceToEdit.relatedModels);
+    
     this.initializeMeasuredValues(this.deviceToEdit.measuredValues);
     this.initializeEditedDeviceDocuments(this.deviceToEdit.deviceDocuments);
     this.initializeEditedModelDocuments(this.deviceToEdit.modelDocuments);
     this.bindOldValues();
     this.deviceToBeEditedDto = this.mapDeviceToEditToAddDeviceDto();
-    //this.deviceToBeEditedDto = this.mapDeviceFormValuesToAddDeviceDto();
+  });
   }
 
-  private setOptionalAreasVisibility() {
-    this.anyModelDocuments = this.deviceToEdit.modelDocuments?.length > 0;
-    this.anyDeviceDocuments = this.deviceToEdit.deviceDocuments?.length > 0;
-    this.anyRelatedDevices = this.deviceToEdit.relatedModels?.length > 0;
+  private buildRelatedDeviceDisplayName(d: any): string {
+    if (!d) return 'ID ?';
+    const num = d.identificationNumber ?? d.deviceIdentificationNumber ?? null;
+    const model = d.model ?? d.modelName ?? null;
+    const serial = d.serialNumber ?? null;
+    if (num && model && serial) return `${num} • ${model} (${serial})`;
+    if (num && model) return `${num} • ${model}`;
+    if (num) return `${num}`;
+    if (model && serial) return `${model} (${serial})`;
+    if (model) return `${model}`;
+    return `ID ${d.id ?? '?'}`;
   }
+
+private setRelatedDevicesToEdit(relatedDevices: any[]) {
+  this.relatedDevicesToEdit = [];
+  if (!Array.isArray(relatedDevices)) relatedDevices = [];
+
+  const displayName = (d: any): string => {
+    const num = d.deviceIdentificationNumber ?? d.identificationNumber ?? d.DeviceIdentificationNumber ?? d.IdentificationNumber ?? null;
+    const model = d.model ?? d.Model ?? d.modelName ?? d.ModelName ?? null;
+    const serial = d.serialNumber ?? d.SerialNumber ?? d.modelSerialNumber ?? d.ModelSerialNumber ?? null;
+    if (num && model && serial) return `${num} • ${model} (${serial})`;
+    if (num && model) return `${num} • ${model}`;
+    if (num) return `${num}`;
+    if (model && serial) return `${model} (${serial})`;
+    if (model) return `${model}`;
+    return `ID ${d.id ?? d.DeviceId ?? d.deviceId ?? '?'}`;
+  };
+
+  this.relatedDevicesToEdit = relatedDevices.map((r: any) => ({
+    id: Number(r.relatedDeviceId),
+    name: displayName(r.relatedDevice)
+  }));
+
+  this.relatedDeviceIds = this.relatedDevicesToEdit.map(x => x.id);
+  this.oldRelatedDeviceIds = [...this.relatedDeviceIds];
+  this.selectedRelatedDeviceIds = [...this.relatedDeviceIds];
+}
+
+  private setOptionalAreasVisibility() {
+  this.anyModelDocuments  = Array.isArray(this.deviceToEdit?.modelDocuments)  && this.deviceToEdit.modelDocuments.length  > 0;
+  this.anyDeviceDocuments = Array.isArray(this.deviceToEdit?.deviceDocuments) && this.deviceToEdit.deviceDocuments.length > 0;
+  this.anyRelatedDevices  = Array.isArray(this.deviceToEdit?.deviceRelations)  && this.deviceToEdit.deviceRelations.length  > 0;
+}
 
   setRelateModelsNamesToEdit(relatedModelsToEdit: any[]) {
     this.relateModelsNamesToEdit = [];
@@ -109,11 +173,14 @@ export class EditDeviceComponent implements AfterViewInit, OnInit {
     relatedModelsToEdit.forEach(x => {
       this.relateModelsNamesToEdit.push({id: x.id, name: x.name});
     })
+
+    this.relatedModelsIds = relatedModelsToEdit?.map((x: any) => x.id) || [];
+    this.oldRelatedModelsIds = [...this.relatedModelsIds];
   }
 
   initializeEditedDeviceDocuments(documents: any) {
     this.editedDeviceDocuments = [];
-    if (documents === null) {
+    if (!Array.isArray(documents) || documents.length === 0) {
       return;
     }
     documents.forEach((x: any) => {
@@ -123,7 +190,7 @@ export class EditDeviceComponent implements AfterViewInit, OnInit {
 
   initializeEditedModelDocuments(documents: any) {
     this.editedModelDocuments = []
-    if (documents === null) {
+    if (!Array.isArray(documents) || documents.length === 0) {
       return;
     }
     documents.forEach((x: any) => {
@@ -161,23 +228,17 @@ export class EditDeviceComponent implements AfterViewInit, OnInit {
   }
 
   private hasFormChanged(newEditedAddDeviceDto: AddDeviceDto): boolean {
-    if (!this.deviceToBeEditedDto) return true;
-    let devicesTheSame = this.compareDevices(this.deviceToBeEditedDto, newEditedAddDeviceDto);
-    return devicesTheSame
-      && this.selectedDeviceFiles.length == 0
-      && this.selectedModelFiles.length == 0
-      && this.deviceDocumentsIdsToBeRemoved.length == 0
-      && this.modelDocumentsIdsToBeRemoved.length == 0
-      && this.relateModelsIdsToBeRemoved.length == 0
-      && this.relatedModelsTheSameAsEdited()
-  }
+  if (!this.deviceToBeEditedDto) return true;
 
-  private relatedModelsTheSameAsEdited(): boolean {
-    if (this.cooperatedModelsIds.length == 0){
-      return true;
-    }
-    return this.arraysHaveSameValues(this.relatedModelsIds, this.cooperatedModelsIds)
-  }
+  const devicesTheSame = this.compareDevices(this.deviceToBeEditedDto, newEditedAddDeviceDto);
+  const linksSame = this.arraysHaveSameValues(this.oldRelatedDeviceIds ?? [], this.selectedRelatedDeviceIds ?? []);
+  const filesOrDocsChanged =
+    this.selectedDeviceFiles.length > 0 ||
+    this.deviceDocumentsIdsToBeRemoved.length > 0 ||
+    this.modelDocumentsIdsToBeRemoved.length > 0;
+
+  return !devicesTheSame || !linksSame || filesOrDocsChanged;
+}
 
   private arraysHaveSameValues(arr1: any[], arr2: any[]): boolean {
     if (arr1.length !== arr2.length) {
@@ -196,120 +257,83 @@ export class EditDeviceComponent implements AfterViewInit, OnInit {
     return true;
   }
 
-  onSubmit() {
-    type ResultItem = {
-      type: 'addDocuments' | 'removeDocuments';
-      success: boolean;
-      data?: any;
-      error?: any;
-    };
+onSubmit() {
+  type ResultItem = { type: 'addDocuments' | 'removeDocuments'; success: boolean; data?: any; error?: any; };
+  this.submitted = true;
 
-    this.submitted = true;
-    if (this.deviceForm.invalid) {
-      console.log('Form is invalid:', this.deviceForm.errors);
-      return;
-    }
+  const newEditedAddDeviceDto = this.mapDeviceFormValuesToAddDeviceDto();
 
-    let newEditedAddDeviceDto = this.mapDeviceFormValuesToAddDeviceDto();
+  if (this.deviceForm.invalid) return;
 
-    const deviceFilesFormData = new FormData();
+  const toRemove = this.oldRelatedDeviceIds.filter(id => !this.selectedRelatedDeviceIds.includes(id));
+  this.relatedDeviceIdsToBeRemoved = toRemove;
 
-    this.selectedDeviceFiles.forEach(file => {
-      deviceFilesFormData.append('files', file);
-    });
+  newEditedAddDeviceDto.relatedDeviceIds = this.selectedRelatedDeviceIds.length
+    ? [...this.selectedRelatedDeviceIds]
+    : undefined;
 
-    if (this.selectedRelatedModelsNames.length > 0) {
-      this.cooperatedModelsIds = [];
-      this.selectedRelatedModelsNames.forEach(x => {
-        this.cooperatedModelsIds.push(x.id);
-      });
-    }
-
-    if (!this.hasFormChanged(newEditedAddDeviceDto)) {
-      alert('Aby dokonać edycji urządzenia, wprowadzone dane muszą się różnić.');
-      return;
-    }
-    //newEditedAddDeviceDto.Model.CooperatedModelsIds = this.cooperatedModelsIds;
-
-    this.markFormGroupTouched(this.deviceForm);
-    if (this.deviceForm.valid) {
-      this.apiService.editDevice(this.deviceToEdit.deviceId, this.deviceToBeEditedDto!, newEditedAddDeviceDto, this.relateModelsIdsToBeRemoved).pipe(
-        switchMap((x: any) => {
-          const observables = [];
-          if (this.selectedDeviceFiles.length > 0) {
-            deviceFilesFormData.append('deviceId', x.deviceId.toString());
-            deviceFilesFormData.append('modelId', '');
-            observables.push(
-              this.apiService.addDocuments(deviceFilesFormData).pipe(
-              map(res => ({ type: 'addDocuments', success: true, data: res })),
-              catchError(err => of({ type: 'addDocuments', success: false, error: err }))
-              )
-            );
-          }
-          if (this.deviceDocumentsIdsToBeRemoved.length > 0) {
-            observables.push(
-              this.apiService.removeDocuments(this.deviceDocumentsIdsToBeRemoved).pipe(
-              map(res => ({ type: 'removeDocuments', success: true, data: res })),
-              catchError(err => of({ type: 'removeDocuments', success: false, error: err }))
-              )
-            );
-          }
-          if(observables.length > 0){
-            return forkJoin(observables).pipe(
-              map(results => ({ x, results }))
-            );
-          } else {
-            return of(x);
-          }
-
-        })
-      ).subscribe(({ x, results }: { x: any, results: ResultItem[] }) => {
-  this.relateModelsNamesToEdit = this.relateModelsNamesToEdit.filter(x => !this.relateModelsIdsToBeRemoved.some(y => y == x.id));
-  if (this.selectedRelatedModelsNames.length > 0) {
-    this.selectedRelatedModelsNames.forEach(x => {
-      this.relateModelsNamesToEdit.push({ id: x.id, name: x.name });
-    });
-  }
-  this.successMessage = '';
-  this.errorMessage = '';
-  let anyError = false;
-
-  this.selectedRelatedModelsNames = [];
-  this.anyRelatedDevices = this.relateModelsNamesToEdit.length > 0;
-
-  const addResult = results.find(r => r.type === 'addDocuments');
-  const removeResult = results.find(r => r.type === 'removeDocuments');
-
-  if (addResult && !addResult.success) 
-  {
-    this.errorMessage = addResult.error?.error || 'Błąd podczas dodawania plików.';
-    anyError = true;
-  } 
-  else if (addResult && addResult.success) 
-  {
-    this.successMessage = 'Pliki zostały pomyślnie dodane.';
-  }
-
-  if (removeResult && !removeResult.success) {
-    this.errorMessage = removeResult.error?.error || 'Błąd podczas usuwania plików.';
-    anyError = true;
-  }
-
-  if (anyError) {
-    window.scroll({ top: 0, behavior: 'smooth' });
+  if (!this.hasFormChanged(newEditedAddDeviceDto)) {
+    alert('Aby dokonać edycji urządzenia, wprowadzone dane muszą się różnić.');
     return;
   }
 
-  const successText = addResult?.success
-    ? 'Urządzenie zostało zaktualizowane. Pliki dodane pomyślnie.'
-    : 'Urządzenie zostało zaktualizowane.';
+  const deviceFilesFormData = new FormData();
+  this.selectedDeviceFiles.forEach((f) => deviceFilesFormData.append('files', f));
 
-  this.router.navigate(['/devices-list'], {
-    state: { message: successText }
-        });
-      });
-    }
-  }
+  this.apiService
+    .editDevice(
+      this.deviceToEdit.deviceId,
+      this.deviceToBeEditedDto!,
+      newEditedAddDeviceDto,
+      this.relatedDeviceIdsToBeRemoved
+    )
+    .pipe(
+      switchMap((x: any) => {
+        const observables: Observable<any>[] = [];
+
+        if (this.selectedDeviceFiles.length > 0) {
+          deviceFilesFormData.append('deviceId', x.deviceId.toString());
+          deviceFilesFormData.append('modelId', '');
+          observables.push(
+            this.apiService.addDocuments(deviceFilesFormData).pipe(
+              map(res => ({ type: 'addDocuments', success: true, data: res })),
+              catchError(err => of({ type: 'addDocuments', success: false, error: err }))
+            )
+          );
+        }
+        if (this.deviceDocumentsIdsToBeRemoved.length > 0) {
+          observables.push(
+            this.apiService.removeDocuments(this.deviceDocumentsIdsToBeRemoved).pipe(
+              map(res => ({ type: 'removeDocuments', success: true, data: res })),
+              catchError(err => of({ type: 'removeDocuments', success: false, error: err }))
+            )
+          );
+        }
+        return observables.length > 0
+          ? forkJoin(observables).pipe(map(results => ({ x, results })))
+          : of({ x, results: [] as ResultItem[] });
+      })
+    )
+    .subscribe(({ x, results }) => {
+      this.relatedDevicesToEdit = this.relatedDevicesToEdit.filter(rd => !toRemove.includes(rd.id));
+      this.anyRelatedDevices = this.relatedDevicesToEdit.length > 0;
+      this.oldRelatedDeviceIds = [...this.selectedRelatedDeviceIds];
+
+      const addResult = results.find(r => r.type === 'addDocuments');
+      const removeResult = results.find(r => r.type === 'removeDocuments');
+      let anyError = false;
+      if (addResult && !addResult.success) { this.errorMessage = addResult.error?.error || 'Błąd podczas dodawania plików.'; anyError = true; }
+      else if (addResult && addResult.success) { this.successMessage = 'Pliki zostały pomyślnie dodane.'; }
+      if (removeResult && !removeResult.success) { this.errorMessage = removeResult.error?.error || 'Błąd podczas usuwania plików.'; anyError = true; }
+      if (anyError) { window.scroll({ top: 0, behavior: 'smooth' }); return; }
+
+      const successText = addResult?.success
+        ? 'Urządzenie zostało zaktualizowane. Pliki dodane pomyślnie.'
+        : 'Urządzenie zostało zaktualizowane.';
+
+      this.router.navigate(['/devices-list'], { state: { message: successText } });
+    });
+}
 
   markFormGroupTouched(control: AbstractControl) {
     if (control instanceof FormGroup) {
@@ -377,8 +401,8 @@ private mapDeviceToEditToAddDeviceDto(): AddDeviceDto {
   addDeviceDto.serialNumber = this.deviceToEdit.serialNumber || '';
   addDeviceDto.company = { name: this.deviceToEdit.producer || '' };
   addDeviceDto.cooperatedModelsIds = this.deviceToEdit.relatedModels?.map((x: any) => x.id) || [];
+  addDeviceDto.relatedDeviceIds = this.deviceToEdit.relatedDevices?.map((x: any) => x.id) || [];
 
-  console.log('Mapped oldDevice AddDeviceDto:', addDeviceDto);
   return addDeviceDto;
 }
 
@@ -390,9 +414,27 @@ private mapDeviceFormValuesToAddDeviceDto(): AddDeviceDto {
     addDeviceDto.calibrationPeriodInYears = this.getValueFromDeviceForm('calibrationPeriodInYears') ?
       +this.getValueFromDeviceForm('calibrationPeriodInYears') : undefined;
     const lastCalibrationDate = this.getValueFromDeviceForm('lastCalibrationDate');
+    const calibrationPeriod = this.getValueFromDeviceForm('calibrationPeriodInYears');
+    
     addDeviceDto.lastCalibrationDate = lastCalibrationDate ? new Date(lastCalibrationDate).toISOString() : undefined;
-    const nextCalibrationDate = this.getValueFromDeviceForm('nextCalibrationDate');
-    addDeviceDto.nextCalibrationDate = nextCalibrationDate ? new Date(nextCalibrationDate).toISOString() : undefined;
+    
+    if (lastCalibrationDate && calibrationPeriod) {
+      const currentISO = new Date(lastCalibrationDate).toISOString();
+      const oldISO = this.deviceToEdit.lastCalibrationDate
+        ? new Date(this.deviceToEdit.lastCalibrationDate).toISOString()
+        : null;
+
+      if (currentISO !== oldISO) {
+        addDeviceDto.lastCalibrationDate = currentISO;
+      }
+    }
+    if (lastCalibrationDate && calibrationPeriod) {
+      const nextDate = new Date(lastCalibrationDate);
+      nextDate.setFullYear(nextDate.getFullYear() + Number(calibrationPeriod));
+      addDeviceDto.nextCalibrationDate = nextDate.toISOString();
+    } else {
+      addDeviceDto.nextCalibrationDate = undefined;
+    }  
     addDeviceDto.isCalibrated = this.getValueFromDeviceForm('isCalibrated') ?? undefined;
     addDeviceDto.isCalibrationCloseToExpire = this.getValueFromDeviceForm('isCalibrationCloseToExpire') ?? undefined;
     addDeviceDto.storageLocation = this.getValueFromDeviceForm('storageLocation') || undefined;
@@ -400,8 +442,11 @@ private mapDeviceFormValuesToAddDeviceDto(): AddDeviceDto {
     addDeviceDto.serialNumber = this.deviceForm.get('model.serialNumber')?.value || '';
     addDeviceDto.company = { name: this.deviceForm.get('model.companyName')?.value || '' };
     addDeviceDto.cooperatedModelsIds = this.cooperatedModelsIds;
+    
+    if (this.selectedRelatedDeviceIds?.length) {
+    addDeviceDto.relatedDeviceIds = this.selectedRelatedDeviceIds.slice();
+  }
 
-    console.log('Mapped AddDeviceDto:', addDeviceDto);
     return addDeviceDto;
   }
 
@@ -466,91 +511,37 @@ private mapDeviceFormValuesToAddDeviceDto(): AddDeviceDto {
   }
 
   onCheckboxChange(name: string, id: number, tableName: string, event: MatCheckboxChange) {
-    this.checkedMap[name] = event.checked;
-    if (this.checkedMap[name]) {
-      this.addSelectedCheckboxValue(tableName, id);
-
+  this.checkedMap[name] = event.checked;
+  if (tableName === TableName.relatedDevices) {
+    if (event.checked) {
+      this.relatedDeviceIdsToBeRemoved.push(id);
     } else {
-      this.removeSelectedCheckboxValue(tableName, id);
+      this.relatedDeviceIdsToBeRemoved = this.relatedDeviceIdsToBeRemoved.filter(n => n !== id);
     }
+    return;
   }
-
-  private addSelectedCheckboxValue(tableName: string, value: number) {
-    if (tableName === TableName.relatedModels) {
-      this.relateModelsIdsToBeRemoved.push(value);
-    } else if (tableName === TableName.editedDeviceDocuments) {
-      this.deviceDocumentsIdsToBeRemoved.push(value);
-    } else if( tableName === TableName.editedModelDocuments) {
-      this.modelDocumentsIdsToBeRemoved.push(value);
-    }
-  }
-
-  private removeSelectedCheckboxValue(tableName: string, value: number) {
-    if (tableName === TableName.relatedModels) {
-      this.relateModelsIdsToBeRemoved = this.relateModelsIdsToBeRemoved.filter(n => n !== value);
-    } else if (tableName === TableName.editedDeviceDocuments) {
-      this.deviceDocumentsIdsToBeRemoved = this.deviceDocumentsIdsToBeRemoved.filter(n => n !== value);
-    } else if( tableName === TableName.editedModelDocuments) {
-      this.modelDocumentsIdsToBeRemoved = this.modelDocumentsIdsToBeRemoved.filter(n => n !== value);
-    }
-  }
+}
 
   getDevices() {
-    this.apiService.getDevices(this.deviceQuery).subscribe((x: any) => {
-      this.devices = x.items;
-      let modelIdNamesWithDuplicates: any = [];
-      this.devices.forEach( device => {
-        let modelIdName = {
-          id: device.modelId,
-          name: device.modelName
-        };
-        modelIdNamesWithDuplicates.push(modelIdName);
-        this.modelNameIds.push(modelIdName);
-        this.modelsNames.push(device.modelName);
-        this.modelsSerialNumbers.push(device.serialNumber);
+  this.apiService.getDevices(this.deviceQuery).subscribe((x: any) => {
+    this.devices = x?.items ?? [];
+
+    this.deviceOptions = this.devices
+      .map((d: any) => {
+        const id = d.id ?? d.deviceId ?? d.deviceID ?? d.device_id ?? d.DeviceId;
+        const name = d.deviceIdentificationNumber ?? '(bez nazwy)';
+        return id != null ? { id: Number(id), name } : undefined;
       })
-      if(this.relateModelsNamesToEdit.length > 0) {
-        this.modelNameIds = this.modelNameIds.filter(x => !this.relateModelsNamesToEdit.some(y => y.id == x.id));
-      }
-      this.modelNameIds = this.prepareReatedModelsListToDisplay(modelIdNamesWithDuplicates);
+      .filter((o): o is { id: number; name: string } => !!o)
+      .filter((o) => o.id !== this.deviceToEdit.deviceId);
+      
+    this.selectedRelatedDeviceIds = [...this.relatedDeviceIds];
 
-      const selectedDevice = this.devices.find(
-      x => x.modelName === this.deviceToEdit.modelName && x.modelSerialNumber === this.deviceToEdit.modelSerialNumber
-    );
-
-    if (selectedDevice) {
-      this.initializeMeasuredValues(selectedDevice.measuredValues);
-      this.deviceForm.patchValue({
-        identificationNumber: this.deviceToEdit.deviceIdentificationNumber || '',
-        productionDate: this.deviceToEdit.productionDate?.split('T')[0] || '',
-        lastCalibrationDate: this.deviceToEdit.lastCalibrationDate ? this.deviceToEdit.lastCalibrationDate.split('T')[0] : '',    calibrationPeriodInYears: this.deviceToEdit.calibrationPeriodInYears || '',
-        //calibrationPeriodInYears: this.deviceToEdit.calibrationPeriodInYears || '',
-        nextCalibrationDate: this.deviceToEdit.nextCalibrationDate ? this.deviceToEdit.nextCalibrationDate.split('T')[0] : '',
-        isCalibrationCloseToExpire: this.deviceToEdit.isCalibrationCloseToExpire ?? null,
-        storageLocation: this.deviceToEdit.storageLocation || '',
-        model: {
-          name: selectedDevice.model,
-          serialNumber: selectedDevice.serialNumber,
-          companyName: selectedDevice.producer
-        }
-      });
+    if (!this.selectedRelatedDeviceIds?.length && this.relatedDeviceIds?.length) {
+    this.selectedRelatedDeviceIds = [...this.relatedDeviceIds];
     }
-    });
-  }
-
-  private prepareReatedModelsListToDisplay(modelIdNamesWithDuplicates: any) : any[] {
-    const uniqueIds = new Set();
-
-    const filteredModels = modelIdNamesWithDuplicates.filter((model : any) => {
-        if (!uniqueIds.has(model.id)) {
-            uniqueIds.add(model.id);
-            return true;
-        }
-        return false;
-    });
-
-    return filteredModels;
-  }
+  });
+}
 
   onDeviceFileChange(event: any) {
     if (event.target.files.length > 0) {
@@ -588,13 +579,9 @@ private mapDeviceFormValuesToAddDeviceDto(): AddDeviceDto {
     var modelMeasuredValues = deviceSelected.measuredValues;
     this.initializeMeasuredValues(modelMeasuredValues);
 
-    //nextCalibrationDate: this.deviceToEdit.nextCalibrationDate ? this.deviceToEdit.nextCalibrationDate.split('T')[0] : '',
-    //isCalibrationCloseToExpire: this.deviceToEdit.isCalibrationCloseToExpire ?? null,
-
     this.deviceForm.patchValue({
       identificationNumber: this.deviceToEdit.deviceIdentificationNumber || '',
       lastCalibrationDate: this.deviceToEdit.lastCalibrationDate ? this.deviceToEdit.lastCalibrationDate.split('T')[0] : '',    calibrationPeriodInYears: this.deviceToEdit.calibrationPeriodInYears || '',
-      //calibrationPeriodInYears: this.deviceToEdit.calibrationPeriodInYears || '',
       storageLocation: this.deviceToEdit.storageLocation || '',
       model: {
         name: deviceSelected.name,
@@ -669,12 +656,10 @@ private mapDeviceFormValuesToAddDeviceDto(): AddDeviceDto {
   }
 
   private bindOldValues() {
-    console.log('deviceToEdit przed przypisaniem:', this.deviceToEdit);
   this.deviceForm.patchValue({
     identificationNumber: this.deviceToEdit.deviceIdentificationNumber || '',
     productionDate: this.deviceToEdit.productionDate?.split('T')[0] || '',
     lastCalibrationDate: this.deviceToEdit.lastCalibrationDate ? this.deviceToEdit.lastCalibrationDate.split('T')[0] : '',    calibrationPeriodInYears: this.deviceToEdit.calibrationPeriodInYears || '',
-    //calibrationPeriodInYears: this.deviceToEdit.calibrationPeriodInYears || '',
     nextCalibrationDate: this.deviceToEdit.nextCalibrationDate ? this.deviceToEdit.nextCalibrationDate.split('T')[0] : '',
     isCalibrationCloseToExpire: this.deviceToEdit.isCalibrationCloseToExpire ?? null,
     storageLocation: this.deviceToEdit.storageLocation || '',
@@ -684,7 +669,7 @@ private mapDeviceFormValuesToAddDeviceDto(): AddDeviceDto {
       companyName: this.deviceToEdit.producer || ''
     }
   });
-
-  console.log('Form after bind:', this.deviceForm.value);
+  this.deviceForm.markAsPristine();
+  this.deviceForm.updateValueAndValidity();
 }
 }

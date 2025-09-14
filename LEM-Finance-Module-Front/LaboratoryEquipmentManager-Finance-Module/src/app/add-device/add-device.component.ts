@@ -33,6 +33,9 @@ export class AddDeviceComponent implements OnInit, AfterViewInit {
   modelNameIds: any[] = [];
   cooperatedModelsIds: number[] = [];
   modelSelected: boolean = false;
+  deviceOptions: { id: number; name: string }[] = [];
+  selectedRelatedDeviceIds: number[] = []; 
+
 
   constructor(private router: Router, private fb: FormBuilder, private apiService: ApiServiceService) {
     this.deviceForm = this.fb.group({
@@ -126,8 +129,15 @@ export class AddDeviceComponent implements OnInit, AfterViewInit {
 
   getDevices() {
     this.apiService.getDevices(this.deviceQuery).subscribe((x: any) => {
-      this.devices = x.items;
+      this.devices = x?.items ?? [];
+      
+      if (this.devices.length) {
+          console.log('Przykładowy rekord urządzenia (keys):', Object.keys(this.devices[0]));
+          console.log('Przykładowy rekord urządzenia (value):', this.devices[0]);
+      }
+
       let modelIdNamesWithDuplicates: any = [];
+      
       this.devices.forEach( device => {
         let modelIdName = {
           id: device.modelId,
@@ -140,6 +150,18 @@ export class AddDeviceComponent implements OnInit, AfterViewInit {
       if (modelIdNamesWithDuplicates.length > 0){
         this.modelNameIds = this.prepareReatedModelsListToDisplay(modelIdNamesWithDuplicates);
       }
+
+      this.deviceOptions = this.devices
+      .map((d: any) => {
+        const id =
+          d.id ?? d.deviceId ?? d.deviceID ?? d.device_id ?? d.DeviceId ?? d.modelId;
+        
+        const name = d.deviceIdentificationNumber ?? '(bez nazwy)';
+
+        return id != null ? { id: Number(id), name } : undefined;
+      })
+      .filter((o): o is { id: number; name: string } => !!o);
+
     });
   }
 
@@ -184,32 +206,33 @@ export class AddDeviceComponent implements OnInit, AfterViewInit {
   onSubmit() {
     this.submitted = true;
     if (this.deviceForm.invalid) {
-      console.log('Form is invalid:', this.deviceForm.errors);
       this.markFormGroupTouched(this.deviceForm);
       return;
     }
 
     let addDeviceDto = this.mapDeviceFormValuesToAddDeviceDto();
 
+    if (this.selectedRelatedDeviceIds.length) {
+    addDeviceDto.relatedDeviceIds = this.selectedRelatedDeviceIds.slice();
+  }
+
     const formData = new FormData();
 
     formData.append('addDeviceDto', JSON.stringify(addDeviceDto));
 
-    this.selectedDeviceFiles.forEach(file => {
-      formData.append('deviceDocuments', file);
-    });
+    this.selectedDeviceFiles.forEach(file => formData.append('deviceDocuments', file));
 
-    if (this.selectedRelatedModelsNames.length > 0) {
-      this.cooperatedModelsIds = [];
-      this.selectedRelatedModelsNames.forEach(x => {
-        this.cooperatedModelsIds.push(x.id);
-      });
-      addDeviceDto.cooperatedModelsIds = this.cooperatedModelsIds;
+    //if (this.selectedRelatedModelsNames.length > 0) {
+    //  this.cooperatedModelsIds = [];
+    //  this.selectedRelatedModelsNames.forEach(x => {
+    //    this.cooperatedModelsIds.push(x.id);
+    //  });
+    //  addDeviceDto.cooperatedModelsIds = this.cooperatedModelsIds;
+//
+    //  formData.set('addDeviceDto', JSON.stringify(addDeviceDto));
+    //}
 
-      formData.set('addDeviceDto', JSON.stringify(addDeviceDto));
-    }
-
-    this.markFormGroupTouched(this.deviceForm);
+    //this.markFormGroupTouched(this.deviceForm);
 
     if (this.deviceForm.valid) {
     this.apiService.createDevice(formData).subscribe({
@@ -299,7 +322,7 @@ export class AddDeviceComponent implements OnInit, AfterViewInit {
     addDeviceDto.model = this.deviceForm.get('model.name')?.value;
     addDeviceDto.serialNumber = this.deviceForm.get('model.serialNumber')?.value;
     addDeviceDto.company = { name: this.deviceForm.get('model.companyName')?.value || '' };
-    addDeviceDto.cooperatedModelsIds = this.cooperatedModelsIds;
+    addDeviceDto.relatedDeviceIds = [];
 
     console.log('Mapped AddDeviceDto:', addDeviceDto);
     return addDeviceDto;

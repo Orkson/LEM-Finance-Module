@@ -20,23 +20,10 @@ namespace Application.Devices.Commands
 
         public async Task<bool> Handle(RemoveDeviceCommand request, CancellationToken cancellationToken)
         {
-            var deviceToBeRemoved = await _deviceRepository.GetDeviceById(request.deviceId, cancellationToken);
-            //var deviceModel = deviceToBeRemoved?.Model;
-            //var modelWithRelatedDevices = await _modelRepository.GetModelWithRelatedDevices(deviceModel.Id, cancellationToken);
-
             using var transaction = await _unitOfWork.BeginTransactionAsync(cancellationToken);
 
             try
             {
-                //if (modelWithRelatedDevices.Devices.Count == 1)
-                //{
-                //    if (modelWithRelatedDevices.Company?.Models.Count == 1)
-                //    {
-                //    }
-                //    await _modelRepository.RemoveModelById(deviceModel.Id, cancellationToken);
-                //}
-
-                //await _companyRepository.RemoveCompanyById(deviceToBeRemoved.Company.Id, cancellationToken);
                 await _deviceRepository.RemoveDeviceById(request.deviceId, cancellationToken);
 
                 transaction.Commit();

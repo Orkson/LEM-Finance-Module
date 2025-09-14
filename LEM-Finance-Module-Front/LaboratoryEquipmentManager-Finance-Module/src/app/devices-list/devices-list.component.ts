@@ -164,7 +164,6 @@ export class DevicesListComponent implements OnInit, AfterViewInit {
 
   private getDevicesBySearchedPhrase(searchPhrase: SearchPhraseDto): void {
     this.service.getDevicesByModelName(searchPhrase).subscribe(devices => {
-      //this.prepareDevicesToDisplay(devices);
     })
   }
 

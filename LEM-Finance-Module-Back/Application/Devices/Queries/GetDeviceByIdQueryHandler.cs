@@ -50,8 +50,18 @@ namespace Application.Devices.Queries
                 EstimatedCalibrationDate = device.LastCalibrationDate.HasValue
                     ? device.LastCalibrationDate.Value.AddYears(device.CalibrationPeriodInYears ?? 0)
                     : (DateTime?)null,
-                //ModelDocuments = GetDocumentsForModel(device.ModelId),
-                //RelatedModels = await GetRelatedModelsAsync(device.ModelId, cancellationToken),
+                DeviceRelations = device.RelatedDevices,
+                //RelatedDevices = device.RelatedDevices
+                //    .Where(d => d.DeviceId != device.Id)
+                //
+                //    .Select(d => new DeviceRelations
+                //    {
+                //        DeviceId = d.DeviceId,
+                //        Device = d.Device,
+                //        RelatedDeviceId = d.RelatedDeviceId,
+                //        RelatedDevice = d.RelatedDevice
+                //    })
+                    
             };
 
             return deviceDetailsDto;

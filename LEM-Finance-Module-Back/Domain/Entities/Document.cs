@@ -7,9 +7,7 @@
         public string Format { get; set; }
         public byte[] Data { get; set; }
         public DateTime? DateAdded { get; set; }
-
         public int? DeviceId { get; set; }
-
         public virtual Device Device { get; set; }
     }
 }

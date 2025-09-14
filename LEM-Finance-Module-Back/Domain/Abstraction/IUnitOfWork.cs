@@ -6,6 +6,7 @@ namespace Domain.Abstraction
     {
         Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default);
         Task CommitAsync(CancellationToken cancellationToken = default);
+        Task SaveChangesAsync(CancellationToken cancellationToken = default);
         void Rollback();
     }
 }

@@ -25,7 +25,7 @@ export class DeviceDetailsComponent implements OnInit {
   rowspan = 1;
   deviceDocuments = this.deviceDto.deviceDocuments;
   modelDocuments = this.deviceDto.modelDocuments;
-  relatedModels = this.deviceDto.relatedModels;
+  relatedDevices = this.deviceDto.deviceRelations;
 
   ngOnInit(): void {
     this.setDisplayMeasuredValuesTable();
@@ -65,9 +65,12 @@ export class DeviceDetailsComponent implements OnInit {
     return modelDocumentsNames.join(',');
   }
 
-  getRelatedDeviceName(relatedModel: any): string {
-    let relatedModelName = relatedModel.name;
-    return relatedModelName;
+  getRelatedDeviceName(relatedDevice: any): string {
+
+    console.log("Related Devices:", this.relatedDevices);
+
+    let relatedDeviceName = relatedDevice.relatedDevice.identificationNumber;
+    return relatedDeviceName;
   }
 
   downloadFile(file: any, event: Event, downloadFor: string) {
@@ -106,7 +109,6 @@ export class DeviceDetailsComponent implements OnInit {
 
   openModelDetails(modelId: number, modelName: string, event: Event) {
     event.preventDefault();
-
     this.apiService.getModelDetails(modelId, modelName).subscribe((modelDetails: any) => {
       this.dialog.open(ModelDetailsComponent, {data: {modelDetails: modelDetails}, autoFocus: false});
     })

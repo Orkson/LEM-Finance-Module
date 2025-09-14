@@ -67,7 +67,10 @@ namespace Web.Controllers
         {
             var query = new GetAllDevicesQuery(pagedAndSortedDevicesQuery);
             var pagedAndSortedDevicesList = await _mediator.Send(query, cancellationToken);
-            return Ok(pagedAndSortedDevicesList);
+            
+            
+                var x = Ok(pagedAndSortedDevicesList);
+            return x;
         }
 
         [HttpGet("{deviceId}")]

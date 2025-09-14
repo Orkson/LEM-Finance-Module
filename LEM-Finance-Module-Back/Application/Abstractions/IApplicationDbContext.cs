@@ -17,7 +17,7 @@ namespace Application.Abstractions
         public DbSet<ExchangeRate> ExchangeRates { get; set; }
         public DbSet<ExpensePlanner> ExpensePlanner { get; set; }
         public DbSet<Service> Service { get; set; }
-
+        public DbSet<DeviceRelations> DeviceRelations { get; set; }
         DatabaseFacade Database { get; }
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);

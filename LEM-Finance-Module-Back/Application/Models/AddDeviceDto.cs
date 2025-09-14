@@ -16,5 +16,6 @@ namespace Application.Models
         public string Model { get; set; }
         public virtual Company Company { get; set; }
         public string SerialNumber { get; set; }
+        public List<int>? RelatedDeviceIds { get; set; }
     }
 }

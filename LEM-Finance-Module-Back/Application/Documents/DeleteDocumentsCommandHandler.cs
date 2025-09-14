@@ -24,7 +24,7 @@ namespace Application.Documents
                 await _documentRepository.RemoveDocumentsAsync(request.DocumentsId);
                 return true;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw new Exception("Usuniecie dokumentow nie powiodlo sie");
             }

@@ -29,6 +29,11 @@ public class UnitOfWork : IUnitOfWork
         }
     }
 
+    public Task SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        return _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
     public void Rollback()
     {
         if (_transaction != null)

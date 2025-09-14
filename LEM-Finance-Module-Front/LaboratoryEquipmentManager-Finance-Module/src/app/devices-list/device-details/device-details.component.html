@@ -74,13 +74,10 @@
         <tr>
           <th>Urządzenia powiązane</th>
           <td>
-            <div *ngFor="let relatedModel of relatedModels">
+            <div *ngFor="let relatedDevice of relatedDevices">
               <a
-                href=""
-                (click)="
-                  openModelDetails(relatedModel.id, relatedModel.name, $event)
-                "
-                >{{ getRelatedDeviceName(relatedModel) }}</a
+                >{{ getRelatedDeviceName(relatedDevice) }}
+                </a
               >
             </div>
           </td>

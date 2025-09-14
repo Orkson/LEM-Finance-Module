@@ -29,6 +29,11 @@ export class ApiServiceService {
     );
   }
 
+  getDeviceById(id: number, includeRelated = true) {
+  const url = `${this.apiUrl}devices/${id}` + (includeRelated ? '?includeRelated=true' : '');
+  return this.http.get(url);
+}
+
   getDeviceDetailsById(deviceId: number): Observable<Object> {
     return this.http.get(this.apiUrl + 'devices/' + deviceId);
   }
@@ -52,9 +57,17 @@ export class ApiServiceService {
   return this.http.post<any>(this.apiUrl + 'devices', formData);
   }
 
-  editDevice(deviceId: number, oldDeviceDto: AddDeviceDto, newDeviceDto: AddDeviceDto, modelCooperationsToBeRemoved: number[] | null): Observable<any> {
+  editDevice(
+    deviceId: number,
+    oldDeviceDto: AddDeviceDto,
+    newDeviceDto: AddDeviceDto,
+    relatedDeviceIdsToBeRemoved: number[] | null
+  ): Observable<any> {
     const url = `${this.apiUrl+'devices'}/${deviceId}`;
-    const body = {oldDevice: oldDeviceDto, newDevice: newDeviceDto, modelCooperationsToBeRemoved: modelCooperationsToBeRemoved,};
+    const body = {
+      oldDevice: oldDeviceDto,
+      newDevice: newDeviceDto,
+      relatedDeviceIdsToBeRemoved,};
     return this.http.put(url, body).pipe((response: any) => response);
   }
 
@@ -135,6 +148,7 @@ export class AddDeviceDto {
    serialNumber: string;
    company: { name: string } = { name: '' };
    cooperatedModelsIds?: number[];
+   relatedDeviceIds?: number[];
 }
 
 export class DeviceDto {

@@ -22,6 +22,7 @@ namespace Infrastructure
         public DbSet<ExchangeRate> ExchangeRates { get; set; }
         public DbSet<ExpensePlanner> ExpensePlanner { get; set; }
         public DbSet<Service> Service { get; set; }
+        public DbSet<DeviceRelations> DeviceRelations { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -83,6 +84,29 @@ namespace Infrastructure
                 .HasOne(e => e.Device)
                 .WithMany()
                 .HasForeignKey(e => e.DeviceId);
+
+            modelBuilder.Entity<DeviceRelations>(j =>
+            {
+                j.ToTable("DeviceRelations");
+
+                // klucz złożony – wymusza unikalność pary
+                j.HasKey(x => new { x.DeviceId, x.RelatedDeviceId });
+
+                // relacja "wychodząca" (Device -> RelatedDevice)
+                j.HasOne(x => x.Device)
+                 .WithMany(d => d.RelatedDevices)
+                 .HasForeignKey(x => x.DeviceId)
+                 .OnDelete(DeleteBehavior.Cascade);
+
+                // relacja "przychodząca" (RelatedDevice -> Device)
+                j.HasOne(x => x.RelatedDevice)
+                 .WithMany(d => d.RelatedByDevices)
+                 .HasForeignKey(x => x.RelatedDeviceId)
+                 .OnDelete(DeleteBehavior.Restrict);
+
+                // (opcjonalnie) indeks dla zapytań „odwrotnych”
+                // j.HasIndex(x => new { x.RelatedDeviceId, x.DeviceId }).IsUnique();
+            });
         }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

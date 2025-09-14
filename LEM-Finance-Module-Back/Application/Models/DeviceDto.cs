@@ -1,12 +1,12 @@
-﻿namespace Application.Models
+﻿using Domain.Entities;
+
+namespace Application.Models
 {
     public class DeviceDto
     {
         public int? DeviceId { get; set; }
         public string? DeviceIdentificationNumber { get; set; }
-        //public string ModelName { get; set; }
         public string? SerialNumber { get; set; }
-        //public int ModelId { get; set; }
         public ICollection<MeasuredValueDto>? MeasuredValues { get; set; }
         public string? StorageLocation { get; set; }
         public DateTime? ProductionDate { get; set; }
@@ -16,7 +16,8 @@
         public bool? IsCloseToExpire { get; set; }
         public string? Producer { get; set; }
         public string? Model { get; set; }
-
+        public ICollection<DeviceRelations>? DeviceRelations { get; set; }
+        public ICollection<Device>? RelatedDevices { get; set; }
         public DateTime? EstimatedCalibrationDate { get; set; }
     }
 }
