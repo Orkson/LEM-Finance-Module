@@ -107,6 +107,7 @@ export class EditDeviceComponent implements AfterViewInit, OnInit {
 
     this.oldRelatedDeviceIds = [...this.relatedDeviceIds];
 
+    this.getDevices();
     this.setOptionalAreasVisibility();
     this.setRelateModelsNamesToEdit(this.deviceToEdit.relatedModels);
     
