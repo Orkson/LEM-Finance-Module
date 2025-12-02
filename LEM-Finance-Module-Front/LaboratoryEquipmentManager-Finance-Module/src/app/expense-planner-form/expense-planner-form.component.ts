@@ -72,23 +72,22 @@ export class ExpensePlannerFormComponent implements OnInit {
 
     //this.calculatePrices();
 
-    if (this.expenseId) {
-      this.apiService.getExpensesByYear(new Date().getFullYear())
-        .subscribe(expenses => {
-          const expense = expenses.find(e => e.id === this.expenseId);
-          if (expense) {
-            this.form.patchValue(expense, { emitEvent: false });
 
-            this.form.get('plannedDate')?.setValue(expense.plannedDate?.split('T')[0]); // ISO → yyyy-MM-dd
-            this.form.get('deviceId')?.setValue(expense.device?.id || expense.deviceId);
-            this.form.get('serviceId')?.setValue(expense.service?.id || expense.serviceId);
-            this.form.get('description')?.setValue(expense.description);
-            
-            this.updateExchangeRate(expense.currency);
-            this.calculatePrices();
-          }
-        });
-      };
+    if (this.expenseId) {
+        this.apiService.getExpenseById(this.expenseId).subscribe(expense => {
+        if (expense) {
+        this.form.patchValue(expense, { emitEvent: false });
+
+        this.form.get('plannedDate')?.setValue(expense.plannedDate?.split('T')[0]); // ISO → yyyy-MM-dd
+        this.form.get('deviceId')?.setValue(expense.device?.id || expense.deviceId);
+        this.form.get('serviceId')?.setValue(expense.service?.id || expense.serviceId);
+        this.form.get('description')?.setValue(expense.description);
+
+        this.updateExchangeRate(expense.currency);
+        this.calculatePrices();
+        }
+      });
+    }
   }
 
   calculatePrices() {

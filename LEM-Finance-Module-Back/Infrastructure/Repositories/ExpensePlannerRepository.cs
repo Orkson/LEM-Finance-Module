@@ -36,6 +36,7 @@ namespace Infrastructure.Repositories
         {
             return await _context.ExpensePlanner
                 .Where(c => c.Id == id)
+                .Include(e => e.Device)
                 .FirstOrDefaultAsync();
         }
 

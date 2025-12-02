@@ -105,7 +105,7 @@ export class ApiServiceService {
 
   getExpensesByYear(year: number): Observable<any[]> {
     console.log('Api URL getExpensesByYear', this.apiUrl);
-    return this.http.get<any[]>(this.apiUrl + `expenses-planner/` + year);
+    return this.http.get<any[]>(this.apiUrl + `expenses-planner/year/` + year);
   }
 
   createExpense(expense: any): Observable<any> {
@@ -130,6 +130,10 @@ export class ApiServiceService {
     return this.http.get<any>(this.apiUrl + 'devices');
   }
 
+  getExpenseById(id: number): Observable<any> {
+  return this.http.get<any>(`${this.apiUrl}expenses-planner/${id}`);
+  }
+
   getExchangeRate(currencyCode: string): Observable<{ currency: string, rate: number }> {
     return this.http.get<{ currency: string, rate: number }>(`${this.apiUrl}currency/${currencyCode}`);
   }
@@ -149,6 +153,7 @@ export class AddDeviceDto {
    company: { name: string } = { name: '' };
    cooperatedModelsIds?: number[];
    relatedDeviceIds?: number[];
+   measuredValues: MeasuredValueDto[];
 }
 
 export class DeviceDto {
@@ -165,14 +170,14 @@ export class DeviceDto {
 }
 
 export class MeasuredValueDto {
-  PhysicalMagnitudeName: string;
-  PhysicalMagnitudeUnit?: string;
-  MeasuredRanges?: MeasuredRangesDto[];
+  physicalMagnitudeName: string;
+  physicalMagnitudeUnit?: string;
+  measuredRanges?: MeasuredRangesDto[];
 }
 
 export class MeasuredRangesDto {
-  Range: string;
-  AccuracyInPercent: number;
+  range: string;
+  accuracyInPercent: number;
 }
 
 export class ModelDto {

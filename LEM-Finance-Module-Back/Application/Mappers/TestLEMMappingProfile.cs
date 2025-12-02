@@ -8,7 +8,13 @@ namespace TestLEM.Mappers
     {
         public TestLEMMappingProfile()
         {
-            CreateMap<AddDeviceDto, Device>();
+            CreateMap<AddDeviceDto, Device>()
+                .ForMember(dest => dest.MeasuredValues, opt => opt.MapFrom(src => src.MeasuredValues));
+
+            CreateMap<MeasuredValueDto, MeasuredValue>()
+                .ForMember(dest => dest.MeasuredRanges, opt => opt.MapFrom(src => src.MeasuredRanges));
+
+            CreateMap<MeasuredRangesDto, MeasuredRange>();
         }
     }
 }
