@@ -1,10 +1,12 @@
-﻿using Application.Abstractions.Messaging;
+﻿using Application.Abstractions;
+using Application.Abstractions.Messaging;
 using Application.Models;
 using Application.Models.Commands;
 using AutoMapper;
 using Domain.Abstraction;
 using Domain.Entities;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace Application.Devices.Commands
 {
@@ -15,14 +17,16 @@ namespace Application.Devices.Commands
         private readonly ISender _sender;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IModelRepository _modelRepository;
+        private readonly IApplicationDbContext _dbContext;
 
-        public EditDeviceCommandHandler(IDeviceRepository deviceRepository, IMapper mapper, ISender sender, IUnitOfWork unitOfWork, IModelRepository modelRepository)
+        public EditDeviceCommandHandler(IDeviceRepository deviceRepository, IMapper mapper, ISender sender, IUnitOfWork unitOfWork, IModelRepository modelRepository, IApplicationDbContext dbContext)
         {
             _deviceRepository = deviceRepository;
             _mapper = mapper;
             _sender = sender;
             _unitOfWork = unitOfWork;
             _modelRepository = modelRepository;
+            _dbContext = dbContext;
         }
 
         public async Task<EditedDeviceResponseDto> Handle(EditDeviceCommand request, CancellationToken cancellationToken)
@@ -62,6 +66,67 @@ namespace Application.Devices.Commands
             if (device?.StorageLocation != newValues.StorageLocation)
             {
                 device.StorageLocation = newValues.StorageLocation;
+            }
+
+            if (newValues.MeasuredValues == null)
+            {
+                var existingMeasuredValues = await _dbContext.MeasuredValues
+                    .Include(mv => mv.MeasuredRanges)
+                    .Where(mv => mv.DeviceId == device.Id)
+                    .ToListAsync(cancellationToken);
+
+                if (existingMeasuredValues.Any())
+                {
+                    _dbContext.MeasuredValues.RemoveRange(existingMeasuredValues);
+                }
+
+                device.MeasuredValues = new List<MeasuredValue>();
+            }
+            else
+            {
+                var existingMeasuredValues = await _dbContext.MeasuredValues
+                    .Include(mv => mv.MeasuredRanges)
+                    .Where(mv => mv.DeviceId == device.Id)
+                    .ToListAsync(cancellationToken);
+
+                if (existingMeasuredValues.Any())
+                {
+                    _dbContext.MeasuredValues.RemoveRange(existingMeasuredValues);
+                }
+
+                device.MeasuredValues = new List<MeasuredValue>();
+
+                foreach (var mvDto in newValues.MeasuredValues)
+                {
+                    if (string.IsNullOrWhiteSpace(mvDto.PhysicalMagnitudeName))
+                        continue;
+
+                    var magnitude = await _deviceRepository.GetOrCreatePhysicalMagnitudeAsync(
+                        mvDto.PhysicalMagnitudeName,
+                        mvDto.PhysicalMagnitudeUnit,
+                        cancellationToken);
+
+                    var mvEntity = new MeasuredValue
+                    {
+                        DeviceId = device.Id,
+                        PhysicalMagnitudeId = magnitude.Id,
+                        MeasuredRanges = new List<MeasuredRange>()
+                    };
+
+                    if (mvDto.MeasuredRanges != null)
+                    {
+                        foreach (var rangeDto in mvDto.MeasuredRanges)
+                        {
+                            mvEntity.MeasuredRanges.Add(new MeasuredRange
+                            {
+                                Range = rangeDto.Range,
+                                AccuracyInPercet = rangeDto.AccuracyInPercent
+                            });
+                        }
+                    }
+
+                    device.MeasuredValues.Add(mvEntity);
+                }
             }
 
             var requested = (newValues.RelatedDeviceIds ?? Enumerable.Empty<int>())
@@ -108,13 +173,11 @@ namespace Application.Devices.Commands
                         toRemove.Select(rid => new DeviceRelations { DeviceId = request.deviceId, RelatedDeviceId = rid }),
                         cancellationToken);
 
-                    // drugi kierunek B -> A (jeśli utrzymujesz symetrię)
                     await _deviceRepository.RemoveDeviceRelationsAsync(
                         toRemove.Select(rid => new DeviceRelations { DeviceId = rid, RelatedDeviceId = request.deviceId }),
                         cancellationToken);
                 }
 
-                // 5) Zapisz zmiany samego urządzenia
                 await _deviceRepository.UpdateDeviceAsync(request.deviceId, device, cancellationToken);
 
                 await _unitOfWork.SaveChangesAsync(cancellationToken);

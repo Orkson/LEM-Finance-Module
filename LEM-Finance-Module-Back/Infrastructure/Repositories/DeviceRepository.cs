@@ -28,11 +28,15 @@ namespace Infrastructure.Repositories
             return result;
         }
 
-        public async Task<Device> GetDeviceById(int id, CancellationToken cancellationToken) => 
+        public async Task<Device> GetDeviceById(int id, CancellationToken cancellationToken) =>
             await _dbContext.Devices
             .Include(x => x.Company)
             .Include(x => x.RelatedDevices)
                 .ThenInclude(r => r.RelatedDevice)
+            .Include(d => d.MeasuredValues)
+                .ThenInclude(mv => mv.PhysicalMagnitude)
+            .Include(d => d.MeasuredValues)
+                .ThenInclude(mv => mv.MeasuredRanges)
             .FirstAsync(x => x.Id == id, cancellationToken);
 
         public async Task RemoveDeviceById(int deviceId, CancellationToken cancellationToken)
@@ -171,6 +175,31 @@ namespace Infrastructure.Repositories
             _dbContext.DeviceRelations.RemoveRange(toDelete);
             
             await _dbContext.SaveChangesAsync(cancellationToken);
+        }
+
+        public async Task<PhysicalMagnitude> GetOrCreatePhysicalMagnitudeAsync(string name, string? unit, CancellationToken cancellationToken)
+        {
+            name = name.Trim();
+            unit = unit?.Trim();
+
+            var magnitude = await _dbContext.PhysicalMagnitudes
+                .FirstOrDefaultAsync(
+                    x => x.Name == name && x.Unit == unit,
+                    cancellationToken);
+
+            if (magnitude != null)
+                return magnitude;
+
+            magnitude = new PhysicalMagnitude
+            {
+                Name = name,
+                Unit = unit
+            };
+
+            _dbContext.PhysicalMagnitudes.Add(magnitude);
+            await _dbContext.SaveChangesAsync(cancellationToken);
+
+            return magnitude;
         }
     }
 }

@@ -17,5 +17,6 @@ namespace Application.Models
         public virtual Company Company { get; set; }
         public string SerialNumber { get; set; }
         public List<int>? RelatedDeviceIds { get; set; }
+        public ICollection<MeasuredValueDto>? MeasuredValues { get; set; }
     }
 }

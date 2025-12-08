@@ -446,7 +446,9 @@ private mapDeviceFormValuesToAddDeviceDto(): AddDeviceDto {
     
     if (this.selectedRelatedDeviceIds?.length) {
     addDeviceDto.relatedDeviceIds = this.selectedRelatedDeviceIds.slice();
-  }
+    }
+
+    addDeviceDto.measuredValues = this.getMeasuredValuesFromDeviceForm();
 
     return addDeviceDto;
   }
@@ -472,9 +474,9 @@ private mapDeviceFormValuesToAddDeviceDto(): AddDeviceDto {
 
     measuredValues.controls.forEach(x => {
       let measuredValueDto = new MeasuredValueDto();
-      measuredValueDto.PhysicalMagnitudeName = x.get('physicalMagnitudeName')?.value;
-      measuredValueDto.PhysicalMagnitudeUnit = x.get('physicalMagnitudeUnit')?.value;
-      measuredValueDto.MeasuredRanges = this.getMeasuredRangesFromDeviceForm(x);
+      measuredValueDto.physicalMagnitudeName = x.get('physicalMagnitudeName')?.value;
+      measuredValueDto.physicalMagnitudeUnit = x.get('physicalMagnitudeUnit')?.value;
+      measuredValueDto.measuredRanges = this.getMeasuredRangesFromDeviceForm(x);
       measuredValuesDto.push(measuredValueDto);
     });
 
@@ -492,8 +494,8 @@ private mapDeviceFormValuesToAddDeviceDto(): AddDeviceDto {
 
     measuredRanges.controls.forEach(x => {
       let measuredRangeDto = new MeasuredRangesDto();
-      measuredRangeDto.AccuracyInPercent = +x.get('accuracyInPercent')?.value;
-      measuredRangeDto.Range = x.get('range')?.value;
+      measuredRangeDto.accuracyInPercent = +x.get('accuracyInPercent')?.value;
+      measuredRangeDto.range = x.get('range')?.value;
       measuredRangesDto.push(measuredRangeDto);
     });
 

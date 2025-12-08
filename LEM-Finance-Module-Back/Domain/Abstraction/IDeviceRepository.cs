@@ -14,5 +14,6 @@ namespace Domain.Abstraction
         Task<List<DeviceRelations>> GetDeviceRelationsAsync(int deviceId, CancellationToken ct);
         Task AddDeviceRelationsAsync(List<DeviceRelations> toInsert, CancellationToken cancellationToken);
         Task RemoveDeviceRelationsAsync(IEnumerable<DeviceRelations> enumerable, CancellationToken cancellationToken);
+        Task<PhysicalMagnitude> GetOrCreatePhysicalMagnitudeAsync(string name, string? unit, CancellationToken cancellationToken);
     }
 }

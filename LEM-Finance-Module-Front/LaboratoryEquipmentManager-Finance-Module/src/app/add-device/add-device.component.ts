@@ -322,6 +322,7 @@ export class AddDeviceComponent implements OnInit, AfterViewInit {
     addDeviceDto.model = this.deviceForm.get('model.name')?.value;
     addDeviceDto.serialNumber = this.deviceForm.get('model.serialNumber')?.value;
     addDeviceDto.company = { name: this.deviceForm.get('model.companyName')?.value || '' };
+    addDeviceDto.measuredValues = this.getMeasuredValuesFromDeviceForm();
     addDeviceDto.relatedDeviceIds = [];
 
     console.log('Mapped AddDeviceDto:', addDeviceDto);
@@ -366,9 +367,9 @@ export class AddDeviceComponent implements OnInit, AfterViewInit {
 
     measuredValues.controls.forEach(x => {
       let measuredValueDto = new MeasuredValueDto();
-      measuredValueDto.PhysicalMagnitudeName = x.get('physicalMagnitudeName')?.value;
-      measuredValueDto.PhysicalMagnitudeUnit = x.get('physicalMagnitudeUnit')?.value;
-      measuredValueDto.MeasuredRanges = this.getMeasuredRangesFromDeviceForm(x);
+      measuredValueDto.physicalMagnitudeName = x.get('physicalMagnitudeName')?.value;
+      measuredValueDto.physicalMagnitudeUnit = x.get('physicalMagnitudeUnit')?.value;
+      measuredValueDto.measuredRanges = this.getMeasuredRangesFromDeviceForm(x);
       measuredValuesDto.push(measuredValueDto);
     });
 
@@ -386,8 +387,8 @@ export class AddDeviceComponent implements OnInit, AfterViewInit {
 
     measuredRanges.controls.forEach(x => {
       let measuredRangeDto = new MeasuredRangesDto();
-      measuredRangeDto.AccuracyInPercent = +x.get('accuracy')?.value;
-      measuredRangeDto.Range = x.get('range')?.value;
+      measuredRangeDto.accuracyInPercent = +x.get('accuracy')?.value;
+      measuredRangeDto.range = x.get('range')?.value;
       measuredRangesDto.push(measuredRangeDto);
     });
 

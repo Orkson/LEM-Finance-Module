@@ -17,12 +17,24 @@ namespace Web.Controllers
             _mediator = mediator;
         }
 
-        [HttpGet("{year:int}")]
+        [HttpGet("year/{year:int}")]
         public async Task<ActionResult<List<ExpensePlannerDto>>> GetExpensePlannerByYear(int year)
         {
             var result = await _mediator.Send(new GetExpensePlannerByYearQuery { Year = year });
             if (result is null || !result.Any())
                 return NotFound($"Nie znaleziono wydatków na rok {year}.");
+
+            return Ok(result);
+        }
+
+        [HttpGet("{id:int}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var result = await _mediator.Send(new GetExpensePlannerByIdQuery(id));
+            if (result == null)
+            {
+                return NotFound();
+            }
 
             return Ok(result);
         }
