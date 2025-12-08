@@ -34,10 +34,8 @@ namespace Application.Devices.Queries
             var deviceDetailsDto = new DeviceDetailsDto
             {
                 DeviceId = device.Id,
-                //ModelName = device.Model?.Name, // odkomentuj, jeśli potrzebujesz
-                //TotalDevicesOfModelCount = _deviceRepository.TotalDevicesByModelCount(device.Model?.Name),
                 DeviceIdentificationNumber = device.IdentificationNumber,
-                MeasuredValues = GetMeasuredValues(device.Id),
+                MeasuredValues = GetMeasuredValues(device),
                 SerialNumber = device.SerialNumber,
                 Model = device.Model,
                 StorageLocation = device.StorageLocation,
@@ -151,24 +149,24 @@ namespace Application.Devices.Queries
             return relatedModels;
         }
 
-        private List<MeasuredValueDto> GetMeasuredValues(int deviceId)
+        private List<MeasuredValueDto> GetMeasuredValues(Device device)
         {
-            var measuredValues = _dbContext.MeasuredValues
-                .Where(x => x.Id == deviceId)
-                .Select(x => new MeasuredValueDto
-                {
-                    Id = x.Id,
-                    PhysicalMagnitudeName = x.PhysicalMagnitude.Name,
-                    PhysicalMagnitudeUnit = x.PhysicalMagnitude.Unit,
-                    MeasuredRanges = (ICollection<MeasuredRangesDto>)x.MeasuredRanges.Select(y => new MeasuredRangesDto
+            return device.MeasuredValues?
+            .Select(mv => new MeasuredValueDto
+            {
+                Id = mv.Id,
+                PhysicalMagnitudeName = mv.PhysicalMagnitude?.Name,
+                PhysicalMagnitudeUnit = mv.PhysicalMagnitude?.Unit,
+                MeasuredRanges = mv.MeasuredRanges?
+                    .Select(r => new MeasuredRangesDto
                     {
-                        Id = y.Id,
-                        Range = y.Range,
-                        AccuracyInPercent = y.AccuracyInPercet
+                        Id = r.Id,
+                        Range = r.Range,
+                        AccuracyInPercent = r.AccuracyInPercet
                     })
-                }).ToList();
-
-            return measuredValues;
+                    .ToList()
+            })
+            .ToList();
         }
     }
 }

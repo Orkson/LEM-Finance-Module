@@ -40,7 +40,26 @@ namespace Application.Models.Queries
             return modelDetailsDto;
         }
 
-        //TODO: move to separate repository
+        //private List<MeasuredValueDto> GetMeasuredValues(int deviceId)
+        //{
+        //    var measuredValues = _dbContext.MeasuredValues
+        //        .Where(x => x.DeviceId == deviceId)
+        //        .Select(x => new MeasuredValueDto
+        //        {
+        //            Id = x.Id,
+        //            PhysicalMagnitudeName = x.PhysicalMagnitude.Name,
+        //            PhysicalMagnitudeUnit = x.PhysicalMagnitude.Unit,
+        //            MeasuredRanges = (ICollection<MeasuredRangesDto>)x.MeasuredRanges.Select(y => new MeasuredRangesDto
+        //            {
+        //                Id = y.Id,
+        //                Range = y.Range,
+        //                AccuracyInPercent = y.AccuracyInPercet
+        //            })
+        //        }).ToList();
+        //
+        //    return measuredValues;
+        //}
+
         private List<MeasuredValueDto> GetMeasuredValues(int deviceId)
         {
             var measuredValues = _dbContext.MeasuredValues
@@ -50,18 +69,18 @@ namespace Application.Models.Queries
                     Id = x.Id,
                     PhysicalMagnitudeName = x.PhysicalMagnitude.Name,
                     PhysicalMagnitudeUnit = x.PhysicalMagnitude.Unit,
-                    MeasuredRanges = (ICollection<MeasuredRangesDto>)x.MeasuredRanges.Select(y => new MeasuredRangesDto
-                    {
-                        Id = y.Id,
-                        Range = y.Range,
-                        AccuracyInPercent = y.AccuracyInPercet
-                    })
+                    MeasuredRanges = x.MeasuredRanges
+                        .Select(y => new MeasuredRangesDto
+                        {
+                            Id = y.Id,
+                            Range = y.Range,
+                            AccuracyInPercent = y.AccuracyInPercet
+                        }).ToList()
                 }).ToList();
 
             return measuredValues;
         }
 
-        //TODO: move to separate repository
         private ICollection<DocumentDto>? GetDocuments(int deviceId)
         {
             var modelDocuments = _dbContext.Documents.Where(x => x.DeviceId == deviceId).ToList();

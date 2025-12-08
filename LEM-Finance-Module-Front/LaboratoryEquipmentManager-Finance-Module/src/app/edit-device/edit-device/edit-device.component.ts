@@ -446,7 +446,9 @@ private mapDeviceFormValuesToAddDeviceDto(): AddDeviceDto {
     
     if (this.selectedRelatedDeviceIds?.length) {
     addDeviceDto.relatedDeviceIds = this.selectedRelatedDeviceIds.slice();
-  }
+    }
+
+    addDeviceDto.measuredValues = this.getMeasuredValuesFromDeviceForm();
 
     return addDeviceDto;
   }
