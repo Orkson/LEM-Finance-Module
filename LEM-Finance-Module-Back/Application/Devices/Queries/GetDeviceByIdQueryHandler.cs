@@ -49,23 +49,12 @@ namespace Application.Devices.Queries
                     ? device.LastCalibrationDate.Value.AddYears(device.CalibrationPeriodInYears ?? 0)
                     : (DateTime?)null,
                 DeviceRelations = device.RelatedDevices,
-                //RelatedDevices = device.RelatedDevices
-                //    .Where(d => d.DeviceId != device.Id)
-                //
-                //    .Select(d => new DeviceRelations
-                //    {
-                //        DeviceId = d.DeviceId,
-                //        Device = d.Device,
-                //        RelatedDeviceId = d.RelatedDeviceId,
-                //        RelatedDevice = d.RelatedDevice
-                //    })
-                    
             };
 
             return deviceDetailsDto;
         }
 
-        private bool? CheckIfDeviceIsCalibrated(DateTime? lasCalibrationDate, int? calibrationPeriodInYears) // do oddzielnego helpera
+        private bool? CheckIfDeviceIsCalibrated(DateTime? lasCalibrationDate, int? calibrationPeriodInYears)
         {
             if (!lasCalibrationDate.HasValue || !calibrationPeriodInYears.HasValue)
             {

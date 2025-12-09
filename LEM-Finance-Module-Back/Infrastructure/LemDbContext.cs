@@ -89,30 +89,24 @@ namespace Infrastructure
             {
                 j.ToTable("DeviceRelations");
 
-                // klucz złożony – wymusza unikalność pary
                 j.HasKey(x => new { x.DeviceId, x.RelatedDeviceId });
 
-                // relacja "wychodząca" (Device -> RelatedDevice)
                 j.HasOne(x => x.Device)
                  .WithMany(d => d.RelatedDevices)
                  .HasForeignKey(x => x.DeviceId)
                  .OnDelete(DeleteBehavior.Cascade);
 
-                // relacja "przychodząca" (RelatedDevice -> Device)
                 j.HasOne(x => x.RelatedDevice)
                  .WithMany(d => d.RelatedByDevices)
                  .HasForeignKey(x => x.RelatedDeviceId)
                  .OnDelete(DeleteBehavior.Restrict);
-
-                // (opcjonalnie) indeks dla zapytań „odwrotnych”
-                // j.HasIndex(x => new { x.RelatedDeviceId, x.DeviceId }).IsUnique();
             });
         }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
             {
-                var timeoutInterceptor = new BusyTimeoutCommandInterceptor(5000); // Timeout 5 sekund
+                var timeoutInterceptor = new BusyTimeoutCommandInterceptor(5000);
 
                 optionsBuilder.UseSqlite("Data Source=mydb.db;")
                               .AddInterceptors(timeoutInterceptor);

@@ -9,7 +9,6 @@
         {
             IdentificationNumber = identificationNumber;
             DeviceId = deviceId;
-            //ModelId = modelId;
         }
     }
 }

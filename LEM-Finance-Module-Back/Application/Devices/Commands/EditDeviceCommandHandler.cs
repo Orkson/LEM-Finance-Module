@@ -141,13 +141,6 @@ namespace Application.Devices.Commands
             var toAdd = requested.Except(current.Select(a => a.DeviceId)).ToList();
             var toRemove = current.Select(a => a.DeviceId).Except(requested).ToList();
 
-            //if (device?.RelatedDevices != newValues.RelatedDeviceIds)
-            //{
-            //    var relatedDevices = await _deviceRepository.GetDevicesByIdsAsync(request.newDeviceDto.RelatedDeviceIds, cancellationToken);
-            //
-            //    device.RelatedDevices = relatedDevices.Select(s => s.Id).ToList();
-            //}
-
             using var transaction = await _unitOfWork.BeginTransactionAsync(cancellationToken);
 
             try

@@ -19,11 +19,6 @@ namespace Application.Documents
             var documents = await _documentRepository.GetDocumentsByName(request.DocoumentName);
             var documentToDownload = new Domain.Entities.Document();
 
-            //if (request.ModelId != null)
-            //{
-            //    documentToDownload = documents.First(x => x.ModelId == request.ModelId);
-            //}
-
             if (request.DeviceId != null)
             {
                 documentToDownload = documents.First(x => x.DeviceId == request.DeviceId);
@@ -49,7 +44,7 @@ namespace Application.Documents
                 case ".jpeg": return "image/jpeg";
                 case ".gif": return "image/gif";
                 case ".txt": return "text/plain";
-                // Add more cases as needed
+
                 default: return "application/octet-stream";
             }
         }

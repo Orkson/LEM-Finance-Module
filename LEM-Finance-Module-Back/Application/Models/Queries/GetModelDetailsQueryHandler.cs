@@ -24,12 +24,10 @@ namespace Application.Models.Queries
         public async Task<ModelDetailsDto> Handle(GetModelDetailsQuery request, CancellationToken cancellationToken)
         {
             var model = await _modelRepository.GetModelById(request.modelId, cancellationToken);
-            //var modelsWithNameCount = _deviceRepository.TotalDevicesByModelCount(request.modelName);
 
             var modelDetailsDto = new ModelDetailsDto
             {
                 Id = model.Id,
-                //TotalModelCount = modelsWithNameCount,
                 Name = model.Name,
                 SerialNumber = model.SerialNumber,
                 CompanyName = model.Company?.Name,
@@ -39,26 +37,6 @@ namespace Application.Models.Queries
             };
             return modelDetailsDto;
         }
-
-        //private List<MeasuredValueDto> GetMeasuredValues(int deviceId)
-        //{
-        //    var measuredValues = _dbContext.MeasuredValues
-        //        .Where(x => x.DeviceId == deviceId)
-        //        .Select(x => new MeasuredValueDto
-        //        {
-        //            Id = x.Id,
-        //            PhysicalMagnitudeName = x.PhysicalMagnitude.Name,
-        //            PhysicalMagnitudeUnit = x.PhysicalMagnitude.Unit,
-        //            MeasuredRanges = (ICollection<MeasuredRangesDto>)x.MeasuredRanges.Select(y => new MeasuredRangesDto
-        //            {
-        //                Id = y.Id,
-        //                Range = y.Range,
-        //                AccuracyInPercent = y.AccuracyInPercet
-        //            })
-        //        }).ToList();
-        //
-        //    return measuredValues;
-        //}
 
         private List<MeasuredValueDto> GetMeasuredValues(int deviceId)
         {
