@@ -40,7 +40,7 @@ namespace Infrastructure
                 .OnDelete(DeleteBehavior.Cascade);
             });
 
-            modelBuilder.Entity<Company>(x => x.HasIndex(x => x.Name).IsUnique());
+            modelBuilder.Entity<Company>(x => x.HasIndex(x => x.Name));
 
             modelBuilder.Entity<PhysicalMagnitude>(pm =>
             {

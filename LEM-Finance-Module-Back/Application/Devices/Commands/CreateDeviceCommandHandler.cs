@@ -27,12 +27,7 @@ namespace Application.Devices.Commands
         public async Task<CreatedDeviceResponseDto> Handle(CreateDeviceCommand request, CancellationToken cancellationToken)
         {
             var identificationNumber = request.AddDeviceDto.IdentificationNumber;
-            var deviceExists = await _deviceRepository.CheckIfDeviceExists(identificationNumber, cancellationToken);
-
-            if (deviceExists)
-            {
-                throw new DeviceAlreadyExistsException(identificationNumber);
-            }
+            
             var device = _mapper.Map<Device>(request.AddDeviceDto);
 
             if (device.NextCalibrationDate == null && device.CalibrationPeriodInYears != null && device.LastCalibrationDate != null)
