@@ -137,19 +137,19 @@ export class DevicesListComponent implements OnInit, AfterViewInit {
   }
 
   setOrderDirection(columnName: string) {
-    let buttonId = columnName == "modelName" ? "orderButtonName" : "orderButtonDate";
-    let orderBtn = document.getElementById(buttonId);
-    if (this.order === "asc") {
-      this.order = "desc";
-      orderBtn?.setAttribute("style", "transform: rotate(180deg)")
-    } else if (this.order === "desc") {
-      this.order = "asc";
-      orderBtn?.setAttribute("style", "transform: rotate(0deg)")
-    }
+  if (this.sortColumn === columnName) {
+    this.order = this.order === 'asc' ? 'desc' : 'asc';
+  } else {
     this.sortColumn = columnName;
-    this.refreshDevicesList();
-    this.sortColumn = '';
+    this.order = 'asc';
   }
+
+  this.refreshDevicesList();
+}
+
+isSortedBy(column: string): boolean {
+  return this.sortColumn === column;
+}
 
   getCalibrationExpireDateForDevice(device: any): any {
     if (device.lastCalibrationDate === null) {

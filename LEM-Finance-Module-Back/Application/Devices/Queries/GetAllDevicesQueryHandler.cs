@@ -19,26 +19,61 @@ namespace Application.Devices.Queries
         public async Task<PagedList<DeviceDto>> Handle(GetAllDevicesQuery request, CancellationToken cancellationToken)
         {
             IQueryable<Device> devicesQuery = _dbContext.Devices.Include(x => x.RelatedDevices);
-            var searchTerm = request.pagedAndSortedDevicesQueryDto.SearchTerm?.ToLower();
-            const string descWord = "desc";
+            
+            var searchTerm = request.pagedAndSortedDevicesQueryDto.SearchTerm?.Trim().ToLower();
+            var sortColumn = request.pagedAndSortedDevicesQueryDto.SortColumn?.Trim().ToLower();
+            var sortOrder = request.pagedAndSortedDevicesQueryDto.SortOrder?.Trim().ToLower();
+            var desc = sortOrder == "desc";
 
             if (!string.IsNullOrWhiteSpace(searchTerm))
             {
-                devicesQuery = devicesQuery
-                        .Include(x => x.MeasuredValues)
-                    .Where(x => x.MeasuredValues.Where(x => x.PhysicalMagnitude.Name.ToLower().Contains(searchTerm)).Any()
-                             || x.IdentificationNumber == searchTerm);
+                devicesQuery = devicesQuery.Where(x =>
+                    x.MeasuredValues.Any(mv =>
+                        mv.PhysicalMagnitude != null &&
+                        mv.PhysicalMagnitude.Name != null &&
+                        mv.PhysicalMagnitude.Name.ToLower().Contains(searchTerm)
+                    )
+                    || (x.IdentificationNumber != null && x.IdentificationNumber.ToLower().Contains(searchTerm))
+                );
             }
-            if (request.pagedAndSortedDevicesQueryDto.SortOrder?.ToLower() == descWord)
+
+            sortColumn = sortColumn switch
             {
-                devicesQuery = devicesQuery.OrderByDescending(x => x.NextCalibrationDate)
-                                               .ThenByDescending(x => x.NextCalibrationDate == null);
-            }
-            else
+                "modelname" => "model",
+                "calibrationdate" => "nextcalibrationdate",
+                "identificationnumber" => "identificationnumber",
+                "deviceidentificationnumber" => "identificationnumber",
+                _ => sortColumn
+            };
+
+            devicesQuery = sortColumn switch
             {
-                devicesQuery = devicesQuery.OrderBy(x => x.NextCalibrationDate == null)
-                                               .ThenBy(x => x.NextCalibrationDate);
-            }
+                "model" => desc
+                    ? devicesQuery.OrderByDescending(x => x.Model)
+                    : devicesQuery.OrderBy(x => x.Model),
+
+                "producer" => desc
+                    ? devicesQuery.OrderByDescending(x => x.Company != null ? x.Company.Name : null)
+                    : devicesQuery.OrderBy(x => x.Company != null ? x.Company.Name : null),
+
+                "identificationnumber" => desc
+                    ? devicesQuery.OrderByDescending(x => x.IdentificationNumber)
+                    : devicesQuery.OrderBy(x => x.IdentificationNumber),
+
+                // sortowanie jak wcześniej: najpierw te z datą, potem null-e na końcu
+                "nextcalibrationdate" => desc
+                    ? devicesQuery.OrderByDescending(x => x.NextCalibrationDate == null)
+                                 .ThenByDescending(x => x.NextCalibrationDate)
+                    : devicesQuery.OrderBy(x => x.NextCalibrationDate == null)
+                                 .ThenBy(x => x.NextCalibrationDate),
+
+                // DEFAULT: jak wcześniej po dacie kolejnej kalibracji
+                _ => desc
+                    ? devicesQuery.OrderByDescending(x => x.NextCalibrationDate == null)
+                                 .ThenByDescending(x => x.NextCalibrationDate)
+                    : devicesQuery.OrderBy(x => x.NextCalibrationDate == null)
+                                 .ThenBy(x => x.NextCalibrationDate),
+            };
 
             var deviceQueryResponse = devicesQuery
             .Select(x => new DeviceDto

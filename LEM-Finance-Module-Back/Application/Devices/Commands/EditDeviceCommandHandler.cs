@@ -67,7 +67,18 @@ namespace Application.Devices.Commands
             {
                 device.StorageLocation = newValues.StorageLocation;
             }
-
+            if (device?.Company.Name != newValues.Company.Name)
+            {
+                device.Company.Name = newValues.Company.Name;
+            }
+            if (device?.SerialNumber != newValues.SerialNumber)
+            {
+                device.SerialNumber = newValues.SerialNumber;
+            }
+            if(device.Model !=  newValues.Model) 
+            {
+                device.Model = newValues.Model;
+            }
             if (newValues.MeasuredValues == null)
             {
                 var existingMeasuredValues = await _dbContext.MeasuredValues

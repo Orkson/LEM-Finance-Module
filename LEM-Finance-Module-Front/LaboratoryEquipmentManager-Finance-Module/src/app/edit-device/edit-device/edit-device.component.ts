@@ -446,9 +446,7 @@ private mapDeviceFormValuesToAddDeviceDto(): AddDeviceDto {
     
     if (this.selectedRelatedDeviceIds?.length) {
     addDeviceDto.relatedDeviceIds = this.selectedRelatedDeviceIds.slice();
-    }
-
-    addDeviceDto.measuredValues = this.getMeasuredValuesFromDeviceForm();
+  }
 
     return addDeviceDto;
   }
@@ -532,7 +530,7 @@ private mapDeviceFormValuesToAddDeviceDto(): AddDeviceDto {
     this.deviceOptions = this.devices
       .map((d: any) => {
         const id = d.id ?? d.deviceId ?? d.deviceID ?? d.device_id ?? d.DeviceId;
-        const name = d.deviceIdentificationNumber ?? '(bez nazwy)';
+        const name = d.modelName ?? d.model ?? '(bez nazwy)';
         return id != null ? { id: Number(id), name } : undefined;
       })
       .filter((o): o is { id: number; name: string } => !!o)

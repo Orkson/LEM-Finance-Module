@@ -69,7 +69,7 @@ export class DeviceDetailsComponent implements OnInit {
 
     console.log("Related Devices:", this.relatedDevices);
 
-    let relatedDeviceName = relatedDevice.relatedDevice.identificationNumber;
+    let relatedDeviceName = relatedDevice.relatedDevice.model;
     return relatedDeviceName;
   }
 
