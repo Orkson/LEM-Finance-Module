@@ -26,10 +26,9 @@
         <th>Cena brutto PLN</th>
         <th>Netto</th>
         <th>Brutto</th>
-        <th>Lokalizacja</th>
-        <th>Podatek (%)</th>
-        <th>Nr urządzenia</th>
-        <th>Lokalizacja urządzenia</th>
+        <th>Laboratorium</th>
+        <th>Nazwa urządzenia</th>
+        <th>Model urządzenia</th>
         <th>Usługa</th>
         <th>Akcje</th>
       </tr>
@@ -44,9 +43,8 @@
         <td>{{ expense.currency !== 'PLN' ? (expense.netPrice | number:'1.2-2') + ' ' + expense.currency : '' }}</td>
         <td>{{ expense.currency !== 'PLN' ? (expense.grossPrice | number:'1.2-2') + ' ' + expense.currency : '' }}</td>
         <td>{{ expense.storageLocationName }}</td>
-        <td>{{ expense.tax }}</td>
         <td>{{ expense.device?.identificationNumber }}</td>
-        <td>{{ expense.device?.storageLocation?.trim().length ? expense.device.storageLocation : '-' }}</td>
+        <td>{{ expense.device?.model }}</td>
         <td>{{ expense.service?.serviceName?.trim().length ? expense.service.serviceName : '-' }}</td>
         <td>
           <div class="btn-group" role="group">

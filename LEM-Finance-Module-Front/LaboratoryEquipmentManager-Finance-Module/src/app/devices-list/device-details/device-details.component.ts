@@ -66,9 +66,6 @@ export class DeviceDetailsComponent implements OnInit {
   }
 
   getRelatedDeviceName(relatedDevice: any): string {
-
-    console.log("Related Devices:", this.relatedDevices);
-
     let relatedDeviceName = relatedDevice.relatedDevice.model;
     return relatedDeviceName;
   }

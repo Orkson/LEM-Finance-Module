@@ -9,7 +9,7 @@
 
     <div class="form-group">
       <label>Laboratorium:</label>
-      <input type="text" formControlName="storageLocationName" placeholder="Wybierz miejsce przechowywania" />
+      <input type="text" formControlName="storageLocationName" />
     </div>
 
     <div class="form-row">
@@ -69,7 +69,7 @@
       <label>Urządzenie:</label>
       <select formControlName="deviceId" required>
         <option *ngFor="let device of devices" [value]="device.deviceId">
-          {{ device.modelName }} {{ device.deviceIdentificationNumber }}
+          {{ device.model }}
         </option>
       </select>
     </div>

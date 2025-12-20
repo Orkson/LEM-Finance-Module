@@ -175,7 +175,10 @@ isSortedBy(column: string): boolean {
   private prepareDevicesMeasuredValuesToDisplay(devices: any[]): void {
     this.measuredValuesAsStringTab = [];
     devices.forEach(x => {
-      x.measuredValues.forEach((element: any) => {
+      const mv = x?.measuredValues ?? [];
+      if (!Array.isArray(mv)) return;
+
+      mv.forEach((element: any) => {
         this.devicePhysicalMagnitudeNames.push(element.physicalMagnitudeName);
       });
       let value = this.devicePhysicalMagnitudeNames.length === 0 ? "--" : this.createStringFromDevicePhysicalMagnitudeNamesList(this.devicePhysicalMagnitudeNames)

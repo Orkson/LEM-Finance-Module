@@ -310,6 +310,16 @@ onSubmit() {
             )
           );
         }
+        if (this.modelDocumentsIdsToBeRemoved.length > 0) {
+          observables.push(
+            this.apiService.removeDocuments(this.modelDocumentsIdsToBeRemoved).pipe(
+              map(res => ({ type: 'removeModelDocuments', success: true, data: res })),
+              catchError(err => of({ type: 'removeModelDocuments', success: false, error: err }))
+            )
+          );
+        }
+
+        
         return observables.length > 0
           ? forkJoin(observables).pipe(map(results => ({ x, results })))
           : of({ x, results: [] as ResultItem[] });
@@ -513,6 +523,33 @@ private mapDeviceFormValuesToAddDeviceDto(): AddDeviceDto {
 
   onCheckboxChange(name: string, id: number, tableName: string, event: MatCheckboxChange) {
   this.checkedMap[name] = event.checked;
+
+  const addOrRemove = (arr: number[]) => {
+    if (event.checked) {
+      if (!arr.includes(id)) arr.push(id);
+    } else {
+      const idx = arr.indexOf(id);
+      if (idx >= 0) arr.splice(idx, 1);
+    }
+  };
+
+  switch (tableName) {
+    case TableName.editedDeviceDocuments:
+      addOrRemove(this.deviceDocumentsIdsToBeRemoved);
+      break;
+
+    case TableName.editedModelDocuments:
+      addOrRemove(this.modelDocumentsIdsToBeRemoved);
+      break;
+
+    case TableName.relatedDevices:
+      addOrRemove(this.relatedDeviceIdsToBeRemoved);
+      break;
+
+    default:
+      break;
+  }
+
   if (tableName === TableName.relatedDevices) {
     if (event.checked) {
       this.relatedDeviceIdsToBeRemoved.push(id);
